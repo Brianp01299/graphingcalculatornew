@@ -20,30 +20,31 @@ class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      "dx":.5,
+      "dx":.5, //temp vars for euler
       "dxE":.5,
-      "y0":0,
-      "minX": 0,
+      "y0":0,//end temp vars for euler
+      "minX": 0, //minmaxXY for visualization
       "minY":0,
       "maxX":10,
       "maxY":10,
-      "dataX":[],
+      "dataX":[],//dataX/Y are arrays used to append arr (generic array) for data points and trances.
       "dataY":[],
       "arr":[],   
-      "counter":[0,0,0],
+      "counter":[0,0,0],//being phased out as map is being used.
       "value": .2,
       "sliders": [{"min":0,"max":1,"value":.5,"step":.1}],
-      "constants":[{"min":0,"max":1,"value":.5,"step":.1,"name":'a',"switch":0}],
-      "functions":[{"value":"x","name":"y"}],
-      "switch":[9654 , 10074,"",10074],
-      "fcnoffset":0,
+      "constants":[{"min":0,"max":1,"value":.5,"step":.1,"name":'a',"switch":0}],//array of constants starts with 1 constant 'a'
+      "functions":[{"value":"x","name":"y"}],//array of functions
+      "switch":[9654 , 10074,"",10074],//used for the switch for paus/play button
+      "fcnoffset":0,//offsets for constants and functions so can keep track of deleted arrays when making new ones so there
+      //is not an overlap of names.
       "constoffset":97,
       //counter is an array of graph, sfg, and eulers so we know how many of each exist
-      //add state variables to control number of textboxes for each div and use that when naming them
       //in order to make removal more efficient, assign the minus buttons next to them with the same number
     }
   }
-  //using mathjs evaluates a mathematical expression
+  //using mathjs evaluates a mathematical expression and a scope
+  //should rename calculate bc its also used for functions
   evaluateDer(tx, ty, expression,scope) {
     scope['x'] = tx;
     scope['y'] = ty;
@@ -78,6 +79,7 @@ class App extends React.Component {
   }
 
   produceDatePointsF(fcn,scope) {
+    //creates a function trace based on 1000 pts.
       this.state.dataX = []
       this.state.dataY = []
       var that = this;
@@ -86,7 +88,6 @@ class App extends React.Component {
         that.state.dataX.push(i)
         that.state.dataY.push(that.evaluateDer(i,0,fcn,scope))
       }
-      console.log(that.state.dataX,that.state.dataY)
 
   }
 
@@ -127,6 +128,7 @@ class App extends React.Component {
   } 
 
   addFunction(index) {
+    //adds a textbox and corresponding elements for functions
     this.state.functions.push({"value":"","name":"y"+String(index)})
     this.setState({functions:this.state.functions})
   }
@@ -134,65 +136,22 @@ class App extends React.Component {
   addSlider(div,name) {
     this.state.sliders.push({"min":0,"max":1,"value":.5,"step":.1})
     this.setState({sliders:this.state.sliders})
-    // var slider = document.createElement('input');
-    // slider.id = div+String(this.state.counter[2]);
-    // slider.type = 'range';
-    // slider.min = 0;
-    // slider.max = 1;
-    // slider.value = 0.5;
-    // slider.step = 0.1;
-    // document.getElementById(div).appendChild(slider);
-    // var box = document.createTextNode(name);
-    // box.id = slider.id + "t";
-    // box.type = "text";
-    // box.value = name
-    // document.getElementById(div).appendChild(box);
 
   }
-
-  updateTextInput(val,id) {
-    document.getElementById(id).value=val; 
-  }
-  
 
   addConstant(index) {
+    //adds a textbox and corresponding elements for constants
     this.state.constants.push({"name":String.fromCharCode(index),"min":0,"max":1,"value":.5,"step":.1,"switch":0})
     this.setState({constants:this.state.constants})
-    // var subDiv = div+String(this.state.counter[type]);
-    // var boxC = document.createElement("input");
-    // boxC.type = "text";
-    // boxC.id = subDiv+"C";
-    // document.getElementById(div).appendChild(boxC);
-    // var box = document.getElementById(div);
-    // var field = document.createElement('text');
-    // field.appendChild(document.createTextNode('='));
-    // field.id = subDiv+'=';
-    // box.appendChild(field);
-    // var boxV = document.createElement("input");
-    // boxV.type = "text";
-    // boxV.id = subDiv+"V";
-    // document.getElementById(div).appendChild(boxV);
-    // this.state.counter[type]+=1;
-    // var button = document.createElement("input");
-    // button.type = "button";
-    // button.value = "-";
-    // button.id = subDiv+'-';
-    // var that =this;
-    // button.onclick = function() {
-    //   that.removeElements(subDiv,["C","=","V","-","br"])
-    //   }
-    // document.getElementById(div).appendChild(button);
-    // const lineBreak = document.createElement('br');
-    // lineBreak.id = subDiv+'br';
-    // document.getElementById(div).appendChild(lineBreak);
   }
-
+  //being phased out instead using slice with .map
   removeElements(div,elements) {
     for (var i =0;i<elements.length;i++){
       var elem = document.getElementById(div+elements[i]);
       elem.parentNode.removeChild(elem);
    }
   }
+  //need to update visualiztion as right now it is very expensive CPU wise learning and researching Plotly.update()
   clear() {
      var layout = {
       xaxis: {
@@ -217,7 +176,6 @@ class App extends React.Component {
       let scope = {};
       for (var i = 0;i<this.state.constants.length;i++) {
         scope[this.state.constants[i].name] = math.compile(this.state.constants[i].value).evaluate(scope);
-        //console.log(scope)
         
       }
       
@@ -226,7 +184,6 @@ class App extends React.Component {
         this.produceDatePointsF(String(this.state.functions[i].value),scope)
         this.state.arr.push(this.state.dataX)
         this.state.arr.push(this.state.dataY);
-        //console.log(scope)
         
       }
       for (var i = 0;i<this.state.counter[EULER];i++) {
@@ -252,7 +209,7 @@ class App extends React.Component {
       };  
       window.Plotly.newPlot(graphDiv, this.make_trace({data:this.state.arr,set_type:"scatter", set_mode : "lines"}), layout);
     } catch(e) {
-      console.log(e);
+      alert(e);
     }
 
   }
@@ -397,7 +354,6 @@ class App extends React.Component {
                       that.setState({constants:that.state.constants})
                     }
                   } >-</button>
-                  
                   <br />
                 </div>
               )
@@ -412,6 +368,7 @@ class App extends React.Component {
          </div>
          
          <div id = "graph"></div>
+
         </header>
       </div>
     );
