@@ -33,6 +33,11 @@ class App extends React.Component {
       "counter":[0,0,0],
       "value": .2,
       "sliders": [{"min":0,"max":1,"value":.5,"step":.1}],
+      "constants":[{"min":0,"max":1,"value":.5,"step":.1,"name":'a',"switch":0}],
+      "functions":[{"value":"x","name":"y"}],
+      "switch":[9654 , 10074,"",10074],
+      "fcnoffset":0,
+      "constoffset":97,
       //counter is an array of graph, sfg, and eulers so we know how many of each exist
       //add state variables to control number of textboxes for each div and use that when naming them
       //in order to make removal more efficient, assign the minus buttons next to them with the same number
@@ -72,6 +77,19 @@ class App extends React.Component {
     }
   }
 
+  produceDatePointsF(fcn,scope) {
+      this.state.dataX = []
+      this.state.dataY = []
+      var that = this;
+      const dxf = (that.state.maxX-that.state.minX)/1000;
+      for (var i =that.state.minX;i<that.state.maxX;i+=dxf) {
+        that.state.dataX.push(i)
+        that.state.dataY.push(that.evaluateDer(i,0,fcn,scope))
+      }
+      console.log(that.state.dataX,that.state.dataY)
+
+  }
+
   make_trace({data, set_type = "scatter", set_mode = "lines"} = {}){
     //makes data points into correct format for visualization
     let dataPoint = [];
@@ -107,6 +125,11 @@ class App extends React.Component {
       document.getElementById(div).appendChild(lineBreak);
       this.state.counter[type]+=1;
   } 
+
+  addFunction(index) {
+    this.state.functions.push({"value":"","name":"y"+String(index)})
+    this.setState({functions:this.state.functions})
+  }
   
   addSlider(div,name) {
     this.state.sliders.push({"min":0,"max":1,"value":.5,"step":.1})
@@ -132,34 +155,36 @@ class App extends React.Component {
   }
   
 
-  addEQ(div,type) {
-    var subDiv = div+String(this.state.counter[type]);
-    var boxC = document.createElement("input");
-    boxC.type = "text";
-    boxC.id = subDiv+"C";
-    document.getElementById(div).appendChild(boxC);
-    var box = document.getElementById(div);
-    var field = document.createElement('text');
-    field.appendChild(document.createTextNode('='));
-    field.id = subDiv+'=';
-    box.appendChild(field);
-    var boxV = document.createElement("input");
-    boxV.type = "text";
-    boxV.id = subDiv+"V";
-    document.getElementById(div).appendChild(boxV);
-    this.state.counter[type]+=1;
-    var button = document.createElement("input");
-    button.type = "button";
-    button.value = "-";
-    button.id = subDiv+'-';
-    var that =this;
-    button.onclick = function() {
-      that.removeElements(subDiv,["C","=","V","-","br"])
-      }
-    document.getElementById(div).appendChild(button);
-    const lineBreak = document.createElement('br');
-    lineBreak.id = subDiv+'br';
-    document.getElementById(div).appendChild(lineBreak);
+  addConstant(index) {
+    this.state.constants.push({"name":String.fromCharCode(index),"min":0,"max":1,"value":.5,"step":.1,"switch":0})
+    this.setState({constants:this.state.constants})
+    // var subDiv = div+String(this.state.counter[type]);
+    // var boxC = document.createElement("input");
+    // boxC.type = "text";
+    // boxC.id = subDiv+"C";
+    // document.getElementById(div).appendChild(boxC);
+    // var box = document.getElementById(div);
+    // var field = document.createElement('text');
+    // field.appendChild(document.createTextNode('='));
+    // field.id = subDiv+'=';
+    // box.appendChild(field);
+    // var boxV = document.createElement("input");
+    // boxV.type = "text";
+    // boxV.id = subDiv+"V";
+    // document.getElementById(div).appendChild(boxV);
+    // this.state.counter[type]+=1;
+    // var button = document.createElement("input");
+    // button.type = "button";
+    // button.value = "-";
+    // button.id = subDiv+'-';
+    // var that =this;
+    // button.onclick = function() {
+    //   that.removeElements(subDiv,["C","=","V","-","br"])
+    //   }
+    // document.getElementById(div).appendChild(button);
+    // const lineBreak = document.createElement('br');
+    // lineBreak.id = subDiv+'br';
+    // document.getElementById(div).appendChild(lineBreak);
   }
 
   removeElements(div,elements) {
@@ -184,17 +209,26 @@ class App extends React.Component {
     window.Plotly.newPlot("graph", this.make_trace({data:this.state.arr,set_type:"scatter", set_mode : "lines"}), layout);
 
   }
+  
   graph() {
     //visualizes data points using plotly
     try {
       var graphDiv = document.getElementById('graph');
       let scope = {};
-      for (var i = 0;i<this.state.counter[CONSTANTS];i++) {
-        if(typeof(document.getElementById("addConstants"+String(i)+"C")) != 'undefined' && document.getElementById("addConstants"+String(i)+"C") != null){
-          scope[document.getElementById("addConstants"+String(i)+"C").value] = math.compile(document.getElementById("addConstants"+String(i)+"V").value).evaluate(scope);
-        }
+      for (var i = 0;i<this.state.constants.length;i++) {
+        scope[this.state.constants[i].name] = math.compile(this.state.constants[i].value).evaluate(scope);
+        //console.log(scope)
+        
       }
+      
       this.produceDatePointsS(document.getElementById("derivative").value,scope);
+      for (var i = 0;i<this.state.sliders.length;i++) {
+        this.produceDatePointsF(String(this.state.functions[i].value),scope)
+        this.state.arr.push(this.state.dataX)
+        this.state.arr.push(this.state.dataY);
+        //console.log(scope)
+        
+      }
       for (var i = 0;i<this.state.counter[EULER];i++) {
         if(typeof(document.getElementById("addEuler"+String(i)+"I")) != 'undefined' && document.getElementById("addEuler"+String(i)+"I") != null){
           this.produceDatePointsE(document.getElementById("addEuler"+String(i)+"I").value,scope);
@@ -218,7 +252,7 @@ class App extends React.Component {
       };  
       window.Plotly.newPlot(graphDiv, this.make_trace({data:this.state.arr,set_type:"scatter", set_mode : "lines"}), layout);
     } catch(e) {
-      alert("There's an error");
+      console.log(e);
     }
 
   }
@@ -228,7 +262,7 @@ class App extends React.Component {
     //render function. Three different divs for different types of functions
     var that = this
 
-    return (
+    return ( 
       <div className="App">
          <header className="App-header">
          <div id = "slope field generator">
@@ -242,7 +276,37 @@ class App extends React.Component {
          <div id = "function">
            <text>Function Graphing</text>
            <div id = "addFunction"></div>
-           
+           {
+            that.state.functions.map((inputObject,index) => {
+              return (
+                <div>
+                  <input id = {String(index)+"sf"} value={inputObject.name} type="text" onChange = {function(){
+                      inputObject.name = document.getElementById(String(index)+"sf").value
+                      that.setState({functions:that.state.functions})
+                  }} />
+                  <output>=</output>
+                  <input id = {String(index)+"af"} value={inputObject.value} type="text" onChange = {function(){
+                      inputObject.value = document.getElementById(String(index)+"af").value
+                      that.setState({functions:that.state.functions})
+                  }} />
+                  <button onClick={
+                    function() {
+                      that.state.functions.splice(index,1);
+                      that.state.fcnoffset++;
+                      that.setState({functions:that.state.functions})
+                    }
+                  }> -</button>
+                  <br />
+                </div>
+              )
+           })
+          }
+          <button onClick = {function(){that.addFunction(that.state.functions.length+that.state.fcnoffset)}}>+</button>
+         </div>
+         
+         <div id = "euler">
+           <text>Euler's Method </text>
+           <div id = "addEuler"></div>
            {
             that.state.sliders.map((inputObject,index) => {
               return (
@@ -277,19 +341,69 @@ class App extends React.Component {
               )
            })
           }
-          <button onClick = {function(){that.addSlider("addFunction","dx")}}>+</button>
-         </div>
-         
-         <div id = "euler">
-           <text>Euler's Method </text>
-           <div id = "addEuler"></div>
            <button onClick = {function(){that.addInputLine("addEuler",EULER)}}>+</button>
          </div>
 
          <div id = "constants">
            <text>Constants</text>
            <div id = "addConstants"></div>
-           <button onClick = {function(){that.addEQ("addConstants",CONSTANTS);}}>+</button>
+           {
+
+            that.state.constants.map((inputObject,index) => {
+              return (
+                <div>
+                  <input id = {String(index)+"sc"} value={inputObject.name} type="text" onChange = {function(){
+                      inputObject.name = document.getElementById(String(index)+"sc").value
+                      that.setState({constants:that.state.constants})
+                  }} />
+                  <output>=</output>
+                  <input id = {String(index)+"ac"} value={inputObject.value} type="text" onChange = {function(){
+                      inputObject.value = document.getElementById(String(index)+"ac").value
+                      that.setState({constants:that.state.constants})
+                  }} />
+                  <br />
+                  <output>min:</output>
+                  <input id = {String(index)+"bc"} value={inputObject.min} type="text" onChange = {function(){
+                      inputObject.min = document.getElementById(String(index)+"bc").value
+                      that.setState({constants:that.state.constants})
+                  }} />
+                  <input type="range" id={String(index)+"cc"} value={inputObject.value} step={inputObject.step} min={inputObject.min} max={inputObject.max} onChange={
+                    function() {
+                      inputObject.value = document.getElementById(String(index)+"cc").value
+                      that.setState({constants:that.state.constants})
+                    }
+                  } />
+                  <output>max:</output>
+                  <input id = {String(index)+"dc"} value={inputObject.max} type="text" onChange = {function(){
+                      inputObject.max = document.getElementById(String(index)+"dc").value
+                      that.setState({constants:that.state.constants})
+                  }} />
+                  <output>step:</output>
+                  <input id = {String(index)+"ec"} value={inputObject.step} type="text" onChange = {function(){
+                      inputObject.step = document.getElementById(String(index)+"ec").value
+                      that.setState({constants:that.state.constants})
+                  }} />
+                  <button onClick ={
+                    function() {
+                      inputObject.switch=(inputObject.switch+1)%2;
+                      that.setState({constants:that.state.constants})
+                      //will do something
+                    }
+                  }>{String.fromCharCode(that.state.switch[inputObject.switch],that.state.switch[inputObject.switch+2])}</button>
+                  <button onClick={
+                    function() {
+                      that.state.constants.splice(index,1)
+                      that.state.constoffset++;
+                      that.setState({constants:that.state.constants})
+                    }
+                  } >-</button>
+                  
+                  <br />
+                </div>
+              )
+           })
+          }
+           <button onClick = {function(){that.addConstant(that.state.constants.length+that.state.constoffset);}}>+</button>
         </div>
 
          <div id = "run">
