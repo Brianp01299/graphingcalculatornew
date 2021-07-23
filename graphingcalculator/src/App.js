@@ -20,25 +20,21 @@ class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      "dx":.5, //temp vars for euler
-      "dxE":.5,
-      "y0":0,//end temp vars for euler
       "minX": 0, //minmaxXY for visualization
       "minY":0,
       "maxX":10,
       "maxY":10,
       "dataX":[],//dataX/Y are arrays used to append arr (generic array) for data points and trances.
       "dataY":[],
-      "arr":[],   
-      "counter":[0,0,0],//being phased out as map is being used.
-      "value": .2,
-      "sliders": [{"min":0,"max":1,"value":.5,"step":.1}],
-      "constants":[{"min":0,"max":1,"value":.5,"step":.1,"name":'a',"switch":0}],//array of constants starts with 1 constant 'a'
+      "arr":[],      
       "functions":[{"value":"x","name":"y"}],//array of functions
+      "eulers":[{"min":0,"max":1,"value":.5,"step":.1,"name":'dy/dx','num':10,"switch":0,"dx":.1, "x0":0,"y0":0}],
+      "constants":[{"min":0,"max":1,"value":.5,"step":.1,"name":'a',"switch":0}],//array of constants starts with 1 constant 'a'
       "switch":[9654 , 10074,"",10074],//used for the switch for paus/play button
       "fcnoffset":0,//offsets for constants and functions so can keep track of deleted arrays when making new ones so there
       //is not an overlap of names.
       "constoffset":97,
+      "euleroffset":0,
       //counter is an array of graph, sfg, and eulers so we know how many of each exist
       //in order to make removal more efficient, assign the minus buttons next to them with the same number
     }
@@ -133,9 +129,10 @@ class App extends React.Component {
     this.setState({functions:this.state.functions})
   }
   
-  addSlider(div,name) {
-    this.state.sliders.push({"min":0,"max":1,"value":.5,"step":.1})
-    this.setState({sliders:this.state.sliders})
+  addEuler(index) {
+    //dito for eulers
+    this.state.eulers.push({"min":0,"max":1,"value":.5,"step":.1,"name":'dy/dx'+String(index),'num':10,"switch":0})
+    this.setState({eulers:this.state.eulers})
 
   }
 
@@ -145,12 +142,7 @@ class App extends React.Component {
     this.setState({constants:this.state.constants})
   }
   //being phased out instead using slice with .map
-  removeElements(div,elements) {
-    for (var i =0;i<elements.length;i++){
-      var elem = document.getElementById(div+elements[i]);
-      elem.parentNode.removeChild(elem);
-   }
-  }
+
   //need to update visualiztion as right now it is very expensive CPU wise learning and researching Plotly.update()
   clear() {
      var layout = {
@@ -262,35 +254,67 @@ class App extends React.Component {
          </div>
          
          <div id = "euler">
-           <text>Euler's Method </text>
-           <div id = "addEuler"></div>
+           <text>Euler's Method</text>
            {
-            that.state.sliders.map((inputObject,index) => {
+             that.state.eulers.map((inputObject,index) => {
               return (
                 <div>
-                  <input id = {String(index)+"a"} value={inputObject.value} type="text" onChange = {function(){
-                      inputObject.value = document.getElementById(String(index)+"a").value
-                      that.setState({sliders:that.state.sliders})
+                  <output id = {String(index)+"se"} >{inputObject.name} </output>
+                  <output> = </output>
+                  <input id = {String(index)+"ae"} value={inputObject.value} type="text" onChange = {function(){
+                      inputObject.value = document.getElementById(String(index)+"ae").value
+                      that.setState({eulers:that.state.eulers})
                   }} />
                   <br />
-                  <input id = {String(index)+"b"} value={inputObject.min} type="text" onChange = {function(){
-                      inputObject.min = document.getElementById(String(index)+"b").value
-                      that.setState({sliders:that.state.sliders})
+                  <output>dx = </output>
+                  <input id = {String(index)+"a0e"} value={inputObject.dx} type="text" onChange = {function(){
+                      inputObject.dx = document.getElementById(String(index)+"a0e").value
+                      that.setState({eulers:that.state.eulers})
                   }} />
-                  <input type="range" id={String(index)+"c"} value={inputObject.value} step={inputObject.step} min={inputObject.min} max={inputObject.max} onChange={
+                  <output> x0 = </output>
+                  <input id = {String(index)+"x0e"} value={inputObject.x0} type="text" onChange = {function(){
+                      inputObject.x0 = document.getElementById(String(index)+"x0e").value
+                      that.setState({eulers:that.state.eulers})
+                  }} />
+                  <output> y0 = </output>
+                  <input id = {String(index)+"y0e"} value={inputObject.y0} type="text" onChange = {function(){
+                      inputObject.y0 = document.getElementById(String(index)+"y0e").value
+                      that.setState({eulers:that.state.eulers})
+                  }} />
+                  <br />
+                  <output>min:</output>
+                  <input id = {String(index)+"bc"} value={inputObject.min} type="text" onChange = {function(){
+                      inputObject.min = document.getElementById(String(index)+"be").value
+                      that.setState({eulers:that.state.eulers})
+                  }} />
+                  <input type="range" id={String(index)+"ce"} value={inputObject.dx} step={inputObject.step} min={inputObject.min} max={inputObject.max} onChange={
                     function() {
-                      inputObject.value = document.getElementById(String(index)+"c").value
-                      that.setState({sliders:that.state.sliders})
+                      inputObject.dx = document.getElementById(String(index)+"ce").value
+                      that.setState({eulers:that.state.eulers})
                     }
                   } />
-                  <input id = {String(index)+"d"} value={inputObject.max} type="text" onChange = {function(){
-                      inputObject.max = document.getElementById(String(index)+"d").value
-                      that.setState({sliders:that.state.sliders})
+                  <output>max:</output>
+                  <input id = {String(index)+"de"} value={inputObject.max} type="text" onChange = {function(){
+                      inputObject.max = document.getElementById(String(index)+"de").value
+                      that.setState({eulers:that.state.eulers})
                   }} />
-                  <button id ="4" onClick={
+                  <output>step:</output>
+                  <input id = {String(index)+"ee"} value={inputObject.step} type="text" onChange = {function(){
+                      inputObject.step = document.getElementById(String(index)+"ee").value
+                      that.setState({eulers:that.state.eulers})
+                  }} />
+                  <button onClick ={
                     function() {
-                      that.state.sliders.splice(index,1)
-                      that.setState({sliders:that.state.sliders})
+                      inputObject.switch=(inputObject.switch+1)%2;
+                      that.setState({eulers:that.state.eulers})
+                      //will do something
+                    }
+                  }>{String.fromCharCode(that.state.switch[inputObject.switch],that.state.switch[inputObject.switch+2])}</button>
+                  <button onClick={
+                    function() {
+                      that.state.eulers.splice(index,1)
+                      that.state.euleroffset++;
+                      that.setState({eulers:that.state.euelrs})
                     }
                   } >-</button>
                   <br />
@@ -305,7 +329,6 @@ class App extends React.Component {
            <text>Constants</text>
            <div id = "addConstants"></div>
            {
-
             that.state.constants.map((inputObject,index) => {
               return (
                 <div>
