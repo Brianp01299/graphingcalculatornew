@@ -135,7 +135,7 @@ class App extends React.Component {
   
   graph() {
     //visualizes data points using plotly
-    //try {
+    try {
       var graphDiv = document.getElementById('graph');
       let scope = {};
       //create the scope by evaluating the constants.
@@ -154,7 +154,6 @@ class App extends React.Component {
       }
       //produces eulers method traces
       for (var i = 0;i<this.state.eulers.length;i++) {
-        //console.log(String(this.state.eulers[i].value))
         this.produceDatePointsE(this.state.eulers[i].value,scope,this.state.eulers[i]);
         this.state.arr.push(this.state.dataX);
         this.state.arr.push(this.state.dataY);
@@ -173,10 +172,10 @@ class App extends React.Component {
         }
       };  
       window.Plotly.newPlot(graphDiv, this.make_trace({data:this.state.arr,set_type:"scatter", set_mode : "lines"}), layout);
-    //} catch(e) {
-      //alert(e);
+    } catch(e) {
+      alert(e);
      // console.log(e)
-   // }
+    }
 
   }
 
