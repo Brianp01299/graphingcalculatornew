@@ -19,7 +19,7 @@ class App extends React.Component {
       "dataY":[],
       "arr":[],      
       "functions":[{"value":"x","name":"y"}],//array of functions
-      "eulers":[{"min":0,"max":1,"value":.5,"step":.1,"name":'dy/dx','num':10,"switch":0,"dx":.1, "x0":0,"y0":0}],
+      "eulers":[{"min":0,"max":1,"value":"x/2","step":.1,"name":'dy/dx','num':10,"switch":0,"dx":.1, "x0":0,"y0":0}],
       "constants":[{"min":0,"max":1,"value":.5,"step":.1,"name":'a',"switch":0}],//array of constants starts with 1 constant 'a'
       "switch":[9654 , 10074,"",10074],//used for the switch for paus/play button
       "fcnoffset":0,//offsets for constants and functions so can keep track of deleted arrays when making new ones so there
@@ -103,7 +103,7 @@ class App extends React.Component {
   
   addEuler(index) {
     //dito for eulers
-    this.state.eulers.push({"min":0,"max":1,"value":.5,"step":.1,"name":'dy/dx'+String(index),'num':10,"switch":0,"dx":.1, "x0":0,"y0":0})
+    this.state.eulers.push({"min":0,"max":1,"value":"x/2","step":.1,"name":'dy/dx'+String(index),'num':10,"switch":0,"dx":.1, "x0":0,"y0":0})
     this.setState({eulers:this.state.eulers})
 
   }
@@ -238,6 +238,11 @@ class App extends React.Component {
                       inputObject.value = document.getElementById(String(index)+"ae").value
                       that.setState({eulers:that.state.eulers})
                   }} />
+                  <output> num: </output>
+                  <input id = {String(index)+"nume"} value={inputObject.num} type="text" onChange = {function(){
+                      inputObject.num = document.getElementById(String(index)+"nume").value
+                      that.setState({eulers:that.state.eulers})
+                  }} />
                   <br />
                   <output>dx = </output>
                   <input id = {String(index)+"a0e"} value={inputObject.dx} type="text" onChange = {function(){
@@ -287,7 +292,7 @@ class App extends React.Component {
                     function() {
                       that.state.eulers.splice(index,1)
                       that.state.euleroffset++;
-                      that.setState({eulers:that.state.euelrs})
+                      that.setState({eulers:that.state.eulers})
                     }
                   } >-</button>
                   <br />
