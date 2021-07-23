@@ -4,17 +4,8 @@ import React from "react";
 import Component from "react";
 import { create, all } from 'mathjs';
 const math = create(all); 
-const EULER = 1
-const CONSTANTS =2
-//to do
-// add constants
-// document naming conventions
-//create funciton w/ for loop to remove all elements from 
-// a div using array of div names
-//create 1 flexible create element function
-//7/13 constants, document naming conventions
-//7/14 create updated remove function
-//7/15-7/16 work on create element functionx
+
+
 class App extends React.Component {
 
   constructor(props) {
@@ -47,15 +38,17 @@ class App extends React.Component {
     return math.compile(expression).evaluate(scope);
   }
 
-  produceDatePointsE(derivative,scope) {  
+  produceDatePointsE(derivative,scope,object) {  
     //produces a set of data points stored in state variables dataX/Y to be visualized 
     //as an antiderivative using euler's method
     this.state.dataX = []
     this.state.dataY = []
-    for (var i =  this.state.minX;i<this.state.maxX;i+=this.state.dxE) {
-      this.state.dataX.push(i)
-      this.state.y0= this.state.y0+this.evaluateDer(i,this.state.y0,derivative,scope)*this.state.dxE;
-      this.state.dataY.push(this.state.y0);
+    var y = object.y0
+    for (var i = 0;i<object.num;i++) {  
+      this.state.dataX.push(i*object.dx+object.x0);
+      //console.log(i,this.state.dataX[i]);
+      y= y+(this.evaluateDer(i*object.dx+object.x0,y,derivative,scope)*object.dx);
+        this.state.dataY.push(y);
       
     }
   }
@@ -101,27 +94,6 @@ class App extends React.Component {
     }
     return dataPoint;
   }
-  addInputLine(div,type){
-      //dynamically adds a text box at the specified div
-      var subDiv = div+String(this.state.counter[type]);
-      var box = document.createElement("input");
-      box.type = "text";
-      box.id = subDiv+"I"; 
-      document.getElementById(div).appendChild(box);
-      var button = document.createElement("input");
-      button.type = "button";
-      button.value = "-";
-      button.id = div+String(this.state.counter[type])+'-';
-      var that = this
-      button.onclick = function() {
-        that.removeElements(subDiv,["I","-","br"])
-      }
-      document.getElementById(div).appendChild(button);
-      const lineBreak = document.createElement('br');
-      lineBreak.id = div+String(this.state.counter[type]) +'br';
-      document.getElementById(div).appendChild(lineBreak);
-      this.state.counter[type]+=1;
-  } 
 
   addFunction(index) {
     //adds a textbox and corresponding elements for functions
@@ -131,7 +103,7 @@ class App extends React.Component {
   
   addEuler(index) {
     //dito for eulers
-    this.state.eulers.push({"min":0,"max":1,"value":.5,"step":.1,"name":'dy/dx'+String(index),'num':10,"switch":0})
+    this.state.eulers.push({"min":0,"max":1,"value":.5,"step":.1,"name":'dy/dx'+String(index),'num':10,"switch":0,"dx":.1, "x0":0,"y0":0})
     this.setState({eulers:this.state.eulers})
 
   }
@@ -163,28 +135,29 @@ class App extends React.Component {
   
   graph() {
     //visualizes data points using plotly
-    try {
+    //try {
       var graphDiv = document.getElementById('graph');
       let scope = {};
+      //create the scope by evaluating the constants.
       for (var i = 0;i<this.state.constants.length;i++) {
         scope[this.state.constants[i].name] = math.compile(this.state.constants[i].value).evaluate(scope);
         
       }
       
-      this.produceDatePointsS(document.getElementById("derivative").value,scope);
-      for (var i = 0;i<this.state.sliders.length;i++) {
-        this.produceDatePointsF(String(this.state.functions[i].value),scope)
-        this.state.arr.push(this.state.dataX)
+      this.produceDatePointsS(document.getElementById("derivative").value,scope); //produce the slope field generator traces
+      //produce traces for functions.
+      for (var i = 0;i<this.state.functions.length;i++) {
+        this.produceDatePointsF(String(this.state.functions[i].value),scope);
+        this.state.arr.push(this.state.dataX);
         this.state.arr.push(this.state.dataY);
         
       }
-      for (var i = 0;i<this.state.counter[EULER];i++) {
-        if(typeof(document.getElementById("addEuler"+String(i)+"I")) != 'undefined' && document.getElementById("addEuler"+String(i)+"I") != null){
-          this.produceDatePointsE(document.getElementById("addEuler"+String(i)+"I").value,scope);
-          this.state.arr.push(this.state.dataX)
-          this.state.arr.push(this.state.dataY);
-        }
-
+      //produces eulers method traces
+      for (var i = 0;i<this.state.eulers.length;i++) {
+        //console.log(String(this.state.eulers[i].value))
+        this.produceDatePointsE(this.state.eulers[i].value,scope,this.state.eulers[i]);
+        this.state.arr.push(this.state.dataX);
+        this.state.arr.push(this.state.dataY);
       }
 
 
@@ -200,9 +173,10 @@ class App extends React.Component {
         }
       };  
       window.Plotly.newPlot(graphDiv, this.make_trace({data:this.state.arr,set_type:"scatter", set_mode : "lines"}), layout);
-    } catch(e) {
-      alert(e);
-    }
+    //} catch(e) {
+      //alert(e);
+     // console.log(e)
+   // }
 
   }
 
@@ -322,7 +296,7 @@ class App extends React.Component {
               )
            })
           }
-           <button onClick = {function(){that.addInputLine("addEuler",EULER)}}>+</button>
+           <button onClick = {function(){that.addEuler(that.state.eulers.length+that.state.euleroffset  )}}>+</button>
          </div>
 
          <div id = "constants">
