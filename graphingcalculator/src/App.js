@@ -5,6 +5,22 @@ import Component from "react";
 import { create, all } from 'mathjs';
 const math = create(all); 
 
+//to do 
+//syntax (:)
+//get play button working (use sleep -- try to multithread during sleep?)
+//add sliders/preferences for slope field generator (need to also update visualiztion but should be easy since there is 1)
+//maybe limit number of calculations by bounding the number of eler methods? not sure necessary
+//add textboxes (+hopefully scroll wheel) for boundaries of graph
+//update VISUALIZATION! create an update graph function that is more efficient (likely will require keeping track of places in array)
+  //this should hopefully help with naming/keeping track of colors in the legend
+//long term/less important: 
+//color(especially sfg)
+//vertical lines (maybe check functinosn if name==='x' change the visualiztion to rely on y rather than x)
+//produce csv of data points
+//move clear button to bottom of graph/get rid of graph button bc updates will happen faster (easy result of harder earlier update fcn)
+//CSS for better UI
+
+//next week create video for CHu
 
 class App extends React.Component {
 
