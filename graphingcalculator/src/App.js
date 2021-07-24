@@ -28,7 +28,11 @@ class App extends React.Component {
       "minY":0,
       "maxX":10,
       "maxY":10,
-      "sfg":{"dx":1,"mindx":1,"maxdx":2,"dy":1,"mindy":1,"maxdy":2,"len":1,"minlen":.1,"maxlen":2,"step":.1},
+      "sfg":{"derivative":"", "sliders":[
+        {"name":"dx = ", "value":1,"min":1,"max":2,"step":.1,"switch":0},
+        {"name":"dy = ", "value":1,"min":1,"max":2,"step":.1,"switch":0},
+        {"name":"Length:", "value":1,"min":1,"max":2,"step":.1,"switch":0},
+      ]},
       "dataX":[],//dataX/Y are arrays used to append arr (generic array) for data points and trances.
       "dataY":[],
       "arr":[],      
@@ -211,85 +215,46 @@ class App extends React.Component {
            <text>dy/dx = </text>
            <input type ="text" id = "derivative"/>
            <br />
-           <output>dx = </output>
-            <input id = {"sfga0s"} value={that.state.sfg.dx} type="text" onChange = {function(){
-                that.state.sfg.dx = document.getElementById("sfga0s").value;
-                that.setState({sfg:that.state.sfg});
-            }} />
-           <br />
-           <output>min:</output>
-           <input id = {"sfgbs"} value={that.state.sfg.mindx} type="text" onChange = {function(){
-                      that.state.sfg.mindx = document.getElementById("sfgbs").value;
+           {that.state.sfg.sliders.map((inputObject,index) => {
+              return (
+                <div>
+                  <output>{inputObject.name} </output>
+                  <input id = {String(index)+"sfga0s"} value={inputObject.value} type="text" onChange = {function(){
+                      inputObject.value = document.getElementById(String(index)+"sfga0s").value;
                       that.setState({sfg:that.state.sfg});
                   }} />
-           <input type="range" id={"sfgce0"} value={that.state.sfg.dx} step={that.state.sfg.step} min={that.state.sfg.mindx} max={that.state.sfg.maxdx} onChange={
-                    function() {
-                      that.state.sfg.dx = document.getElementById("sfgce0").value;
-                      that.setState({sfg:that.state.sfg});
-                    }
-                  } />
-           <output>max:</output>
-                  <input id = {"sfgde0"} value={that.state.sfg.maxdx} type="text" onChange = {function(){
-                      that.state.maxdx = document.getElementById("sfgde0").value;
+                 <br />
+                 <output>min:</output>
+                 <input id = {String(index)+"sfgbs"} value={inputObject.min} type="text" onChange = {function(){
+                            inputObject.min = document.getElementById(String(index)+"sfgbs").value;
+                            that.setState({sfg:that.state.sfg});
+                        }} />
+                 <input type="range" id={String(index)+"sfgce0"} value={inputObject.value} step={inputObject.step} min={inputObject.min} max={inputObject.max} onChange={
+                          function() {
+                            inputObject.value = document.getElementById(String(index)+"sfgce0").value;
+                            that.setState({sfg:that.state.sfg});
+                          }
+                        } />  
+                 <output>max:</output>
+                 <input id = {String(index)+"sfgbso"} value={inputObject.max} type="text" onChange = {function(){
+                            inputObject.max = document.getElementById(String(index)+"sfgbso").value;
+                            that.setState({sfg:that.state.sfg});
+                        }} />
+                 <output>step:</output>
+                 <input id = {String(index)+"ee0"} value={inputObject.step} type="text" onChange = {function(){
+                      inputObject.step = document.getElementById(String(index)+"ee0").value;
                       that.setState({sfg:that.state.sfg});
                   }} />
-           <br />
-           <output>dy = </output>
-                  <input id = {"sfga0e"} value={that.state.sfg.dy} type="text" onChange = {function(){
-                      that.state.sfg.dy = document.getElementById("sfga0e").value;
-                      that.setState({sfg:that.state.sfg});
-                  }} />
-           <br />
-           <output>min:</output>
-           <input id = {"sfgbe"} value={that.state.sfg.mindy} type="text" onChange = {function(){
-                      that.state.sfg.mindy = document.getElementById("sfgbe").value;
-                      that.setState({sfg:that.state.sfg});
-                  }} />
-           <input type="range" id={"sfgce"} value={that.state.sfg.dy} step={that.state.sfg.step} min={that.state.sfg.mindy} max={that.state.sfg.maxdy} onChange={
-                    function() {
-                      that.state.sfg.dy = document.getElementById("sfgce").value;
-                      that.setState({sfg:that.state.sfg});
-                    }
-                  } />
-           <output>max:</output>
-                  <input id = {"sfgde"} value={that.state.sfg.maxdy} type="text" onChange = {function(){
-                      that.state.sfg.maxdy = document.getElementById("sfgde").value;
-                      that.setState({sfg:that.state.sfg});
-                  }} />  
-          <output>step:</output>
-                  <input id = "sfgec"} value={that.state.sfg.step} type="text" onChange = {function(){
-                      that.state.sfg.step = document.getElementById("sfgec").value;
-                      that.setState({constants:that.state.constants});
-                  }} />
-                  <button onClick ={
+                 <button onClick ={
                     function() {
                       inputObject.switch=(inputObject.switch+1)%2;
-                      that.setState({constants:that.state.constants});
+                      that.setState({sfg:that.state.sfg});
                       //will do something
                     }
-          <br /> 
-          <output>len = </output>
-                  <input id = {"sfga0e1"} value={that.state.sfg.len} type="text" onChange = {function(){
-                      that.state.sfg.len = document.getElementById("sfga0e1").value;
-                      that.setState({sfg:that.state.sfg});
-                  }} />
-           <br />
-           <output>min:</output>
-           <input id = {"sfgbe1"} value={that.state.sfg.minlen} type="text" onChange = {function(){
-                      that.state.sfg.minlen = document.getElementById("sfgbe1").value;
-                      that.setState({sfg:that.state.sfg});
-                  }} />
-           <input type="range" id={"sfgce1"} value={that.state.sfg.len} step={that.state.sfg.step} min={that.state.sfg.minlen} max={that.state.sfg.maxlen} onChange={
-                    function() {
-                      that.state.sfg.len = document.getElementById("sfgce1").value;
-                      that.setState({sfg:that.state.sfg});
-                    }
-                  } />
-           <output>max:</output>
-                  <input id = {"sfgde1"} value={that.state.sfg.maxlen} type="text" onChange = {function(){
-                      that.state.sfg.maxlen = document.getElementById("sfgde1").value;
-                      that.setState({sfg:that.state.sfg});
-                  }} />      
+                  }>{String.fromCharCode(that.state.switch[inputObject.switch],that.state.switch[inputObject.switch+2])}</button>
+
+               </div>
+              )})}   
            <br /> <br />
          </div>
 
