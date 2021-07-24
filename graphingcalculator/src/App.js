@@ -73,9 +73,9 @@ class App extends React.Component {
     //in state virables arr
     var that =this;
     that.state.arr = [];
-    var dx=parseFloat(that.state.sfg.dx);
-    var dy=parseFloat(that.state.sfg.dy);
-    var len=parseFloat(that.state.sfg.len);
+    var dx=parseFloat(that.state.sfg.sliders[0].value);
+    var dy=parseFloat(that.state.sfg.sliders[1].value);
+    var len=parseFloat(that.state.sfg.sliders[2].value);
     var minX=parseFloat(that.state.minX);
     var maxX=parseFloat(that.state.maxX);
     var minY=parseFloat(that.state.minY);
