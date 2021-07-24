@@ -38,23 +38,20 @@ class App extends React.Component {
       "eulers":[{"min":0,"max":1,"value":"2*x","step":.1,"name":'dy/dx','num':10,"switch":0,"dx":.1, "x0":0,"y0":0}],
       "constants":[{"min":0,"max":1,"value":.5,"step":.1,"name":'a',"switch":0}],//array of constants starts with 1 constant 'a'
       "switch":[9654 , 10074,"",10074],//used for the switch for paus/play button
-      "fcnoffset":0,//offsets for constants and functions so can keep track of deleted arrays when making new ones so there
-      //is not an overlap of names.
-      "constoffset":97,
+      "fcnoffset":0,//offsets for constants, eulers and functions so can keep track of deleted arrays when making new ones so there
+      "constoffset":97, //is not an overlap of default names.
       "euleroffset":0,
-      //counter is an array of graph, sfg, and eulers so we know how many of each exist
-      //in order to make removal more efficient, assign the minus buttons next to them with the same number
     }
   }
   //using mathjs evaluates a mathematical expression and a scope
   //should rename calculate bc its also used for functions
-  evaluateDer(tx, ty, expression,scope) {
+  evaluateExpression(tx, ty, expression,scope) {
     scope['x'] = tx;
     scope['y'] = ty;
     return math.compile(expression).evaluate(scope);
   }
 
-  produceDatePointsE(derivative,scope,object) {  
+  produceDataPointsE(derivative,scope,object) {  
     //produces a set of data points stored in state variables dataX/Y to be visualized 
     //as an antiderivative using euler's method
     this.state.dataX = []
@@ -64,26 +61,26 @@ class App extends React.Component {
     var dx = parseFloat(object.dx);
     for (var i = 0;i<parseFloat(object.num);i++) {  
       this.state.dataX.push(i*dx+x0);     
-      y= y+(this.evaluateDer(i*dx+x0,y,derivative,scope)*dx);
+      y= y+(this.evaluateExpression(i*dx+x0,y,derivative,scope)*dx);
       this.state.dataY.push(y);     
     }
   }
 
-  produceDatePointsS(derivative,scope) {
+  produceDataPointsS(derivative,scope) {
     //produces sets of 4 points (2x,2y) to generate a slope field stored 
     //in state virables arr
     var that =this
     that.state.arr = []
     for (var i =  that.state.minX;i<that.state.maxX;i+=that.state.dx) {
       for (var j = that.state.minY;j<that.state.maxY;j+=that.state.dx) {
-        var evaled = that.evaluateDer(i,j,derivative,scope);
+        var evaled = that.evaluateExpression(i,j,derivative,scope);
         that.state.arr.push([i-that.state.dx/2,i+that.state.dx/2]);
         that.state.arr.push([j-evaled*that.state.dx/2,j+evaled*that.state.dx/2]);
       }
     }
   }
 
-  produceDatePointsF(fcn,scope) {
+  produceDataPointsF(fcn,scope) {
     //creates a function trace based on 1000 pts.
       this.state.dataX = []
       this.state.dataY = []
@@ -91,7 +88,7 @@ class App extends React.Component {
       const dxf = (that.state.maxX-that.state.minX)/1000;
       for (var i =that.state.minX;i<that.state.maxX;i+=dxf) {
         that.state.dataX.push(i)
-        that.state.dataY.push(that.evaluateDer(i,0,fcn,scope))
+        that.state.dataY.push(that.evaluateExpression(i,0,fcn,scope))
       }
 
   }
@@ -160,17 +157,17 @@ class App extends React.Component {
         
       }
       
-      this.produceDatePointsS(document.getElementById("derivative").value,scope); //produce the slope field generator traces
+      this.produceDataPointsS(document.getElementById("derivative").value,scope); //produce the slope field generator traces
       //produce traces for functions.
       for (var i = 0;i<this.state.functions.length;i++) {
-        this.produceDatePointsF(String(this.state.functions[i].value),scope);
+        this.produceDataPointsF(String(this.state.functions[i].value),scope);
         this.state.arr.push(this.state.dataX);
         this.state.arr.push(this.state.dataY);
         
       }
       //produces eulers method traces
       for (var i = 0;i<this.state.eulers.length;i++) {
-        this.produceDatePointsE(this.state.eulers[i].value,scope,this.state.eulers[i]);
+        this.produceDataPointsE(this.state.eulers[i].value,scope,this.state.eulers[i]);
         this.state.arr.push(this.state.dataX);
         this.state.arr.push(this.state.dataY);
       }
