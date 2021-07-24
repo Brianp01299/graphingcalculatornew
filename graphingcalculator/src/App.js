@@ -209,6 +209,39 @@ class App extends React.Component {
     return ( 
       <div className="App">
          <header className="App-header">
+         
+
+         <div id = "function">
+           <text>Function Graphing</text>
+           <div id = "addFunction"></div>
+           {
+            that.state.functions.map((inputObject,index) => {
+              return (
+                <div>
+                  <input id = {String(index)+"sf"} value={inputObject.name} type="text" onChange = {function(){
+                      inputObject.name = document.getElementById(String(index)+"sf").value
+                      that.setState({functions:that.state.functions})
+                  }} />
+                  <output>=</output>
+                  <input id = {String(index)+"af"} value={inputObject.value} type="text" onChange = {function(){
+                      inputObject.value = document.getElementById(String(index)+"af").value
+                      that.setState({functions:that.state.functions})
+                  }} />
+                  <button onClick={
+                    function() {
+                      that.state.functions.splice(index,1);
+                      that.state.fcnoffset++;
+                      that.setState({functions:that.state.functions})
+                    }
+                  }> -</button>
+                  <br />
+                </div>
+              )
+           })
+          }
+          <button onClick = {function(){that.addFunction(that.state.functions.length+that.state.fcnoffset)}}>+</button>
+          <br /> 
+         </div>
          <div id = "slope field generator">
            <text> Slope Field Generator </text>
            <br />
@@ -255,40 +288,8 @@ class App extends React.Component {
 
                </div>
               )})}   
-           <br /> <br />
+           <br /> 
          </div>
-
-         <div id = "function">
-           <text>Function Graphing</text>
-           <div id = "addFunction"></div>
-           {
-            that.state.functions.map((inputObject,index) => {
-              return (
-                <div>
-                  <input id = {String(index)+"sf"} value={inputObject.name} type="text" onChange = {function(){
-                      inputObject.name = document.getElementById(String(index)+"sf").value
-                      that.setState({functions:that.state.functions})
-                  }} />
-                  <output>=</output>
-                  <input id = {String(index)+"af"} value={inputObject.value} type="text" onChange = {function(){
-                      inputObject.value = document.getElementById(String(index)+"af").value
-                      that.setState({functions:that.state.functions})
-                  }} />
-                  <button onClick={
-                    function() {
-                      that.state.functions.splice(index,1);
-                      that.state.fcnoffset++;
-                      that.setState({functions:that.state.functions})
-                    }
-                  }> -</button>
-                  <br />
-                </div>
-              )
-           })
-          }
-          <button onClick = {function(){that.addFunction(that.state.functions.length+that.state.fcnoffset)}}>+</button>
-         </div>
-         
          <div id = "euler">
            <text>Euler's Method</text>
            {
@@ -424,6 +425,7 @@ class App extends React.Component {
            })
           }
            <button onClick = {function(){that.addConstant(that.state.constants.length+that.state.constoffset);}}>+</button>
+        <br /> 
         </div>
 
          <div id = "run">
