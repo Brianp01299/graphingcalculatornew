@@ -35,7 +35,7 @@ class App extends React.Component {
       "dataY":[],
       "arr":[],      
       "functions":[{"value":"x","name":"y"}],//array of functions
-      "eulers":[{"min":0,"max":1,"value":"x/2","step":.1,"name":'dy/dx','num':10,"switch":0,"dx":.1, "x0":0,"y0":0}],
+      "eulers":[{"min":0,"max":1,"value":"2*x","step":.1,"name":'dy/dx','num':10,"switch":0,"dx":.1, "x0":0,"y0":0}],
       "constants":[{"min":0,"max":1,"value":.5,"step":.1,"name":'a',"switch":0}],//array of constants starts with 1 constant 'a'
       "switch":[9654 , 10074,"",10074],//used for the switch for paus/play button
       "fcnoffset":0,//offsets for constants and functions so can keep track of deleted arrays when making new ones so there
@@ -59,13 +59,13 @@ class App extends React.Component {
     //as an antiderivative using euler's method
     this.state.dataX = []
     this.state.dataY = []
-    var y = object.y0
-    for (var i = 0;i<object.num;i++) {  
-      this.state.dataX.push(i*object.dx+object.x0);
-      //console.log(i,this.state.dataX[i]);
-      y= y+(this.evaluateDer(i*object.dx+object.x0,y,derivative,scope)*object.dx);
-        this.state.dataY.push(y);
-      
+    var y = parseFloat(object.y0);
+    var x0 = parseFloat(object.x0);
+    var dx = parseFloat(object.dx);
+    for (var i = 0;i<parseFloat(object.num);i++) {  
+      this.state.dataX.push(i*dx+x0);     
+      y= y+(this.evaluateDer(i*dx+x0,y,derivative,scope)*dx);
+      this.state.dataY.push(y);     
     }
   }
 
@@ -119,7 +119,7 @@ class App extends React.Component {
   
   addEuler(index) {
     //dito for eulers
-    this.state.eulers.push({"min":0,"max":1,"value":"x/2","step":.1,"name":'dy/dx'+String(index),'num':10,"switch":0,"dx":.1, "x0":0,"y0":0})
+    this.state.eulers.push({"min":0,"max":1,"value":"2*x","step":.1,"name":'dy/dx'+String(index),'num':10,"switch":0,"dx":.1, "x0":0,"y0":0})
     this.setState({eulers:this.state.eulers})
 
   }
