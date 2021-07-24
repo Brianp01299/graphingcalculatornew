@@ -1,4 +1,3 @@
-
 import './App.css';
 import React from "react";
 import Component from "react";
@@ -31,6 +30,7 @@ class App extends React.Component {
       "minY":0,
       "maxX":10,
       "maxY":10,
+      "sfg":{"dx":1,"mindx":1,"maxdx":2,"dy":1,"mindy":1,"maxdy":2,"len":1,"step":.1},
       "dataX":[],//dataX/Y are arrays used to append arr (generic array) for data points and trances.
       "dataY":[],
       "arr":[],      
@@ -54,8 +54,8 @@ class App extends React.Component {
   produceDataPointsE(derivative,scope,object) {  
     //produces a set of data points stored in state variables dataX/Y to be visualized 
     //as an antiderivative using euler's method
-    this.state.dataX = []
-    this.state.dataY = []
+    this.state.dataX = [];
+    this.state.dataY = [];
     var y = parseFloat(object.y0);
     var x0 = parseFloat(object.x0);
     var dx = parseFloat(object.dx);
@@ -69,21 +69,28 @@ class App extends React.Component {
   produceDataPointsS(derivative,scope) {
     //produces sets of 4 points (2x,2y) to generate a slope field stored 
     //in state virables arr
-    var that =this
-    that.state.arr = []
-    for (var i =  that.state.minX;i<that.state.maxX;i+=that.state.dx) {
-      for (var j = that.state.minY;j<that.state.maxY;j+=that.state.dx) {
+    var that =this;
+    that.state.arr = [];
+    var dx=parseFloat(that.state.sfg.dx);
+    var dy=parseFloat(that.state.sfg.dy);
+    var len=parseFloat(that.state.sfg.len);
+    var minX=parseFloat(that.state.minX);
+    var maxX=parseFloat(that.state.maxX);
+    var minY=parseFloat(that.state.minY);
+    var maxY=parseFloat(that.state.maxY);
+    for (var i =  minX;i<maxX;i+=dx) {
+      for (var j = minY;j<maxY;j+=dx) {
         var evaled = that.evaluateExpression(i,j,derivative,scope);
-        that.state.arr.push([i-that.state.dx/2,i+that.state.dx/2]);
-        that.state.arr.push([j-evaled*that.state.dx/2,j+evaled*that.state.dx/2]);
+        that.state.arr.push([i-len/2,i+len/2]);
+        that.state.arr.push([j-evaled*len/2,j+evaled*len/2]);
       }
     }
   }
 
   produceDataPointsF(fcn,scope) {
     //creates a function trace based on 1000 pts.
-      this.state.dataX = []
-      this.state.dataY = []
+      this.state.dataX = [];
+      this.state.dataY = [];
       var that = this;
       const dxf = (that.state.maxX-that.state.minX)/1000;
       for (var i =that.state.minX;i<that.state.maxX;i+=dxf) {
@@ -110,21 +117,21 @@ class App extends React.Component {
 
   addFunction(index) {
     //adds a textbox and corresponding elements for functions
-    this.state.functions.push({"value":"","name":"y"+String(index)})
-    this.setState({functions:this.state.functions})
+    this.state.functions.push({"value":"","name":"y"+String(index)});
+    this.setState({functions:this.state.functions});
   }
   
   addEuler(index) {
     //dito for eulers
-    this.state.eulers.push({"min":0,"max":1,"value":"2*x","step":.1,"name":'dy/dx'+String(index),'num':10,"switch":0,"dx":.1, "x0":0,"y0":0})
-    this.setState({eulers:this.state.eulers})
+    this.state.eulers.push({"min":0,"max":1,"value":"2*x","step":.1,"name":'dy/dx'+String(index),'num':10,"switch":0,"dx":.1, "x0":0,"y0":0});
+    this.setState({eulers:this.state.eulers});
 
   }
 
   addConstant(index) {
     //adds a textbox and corresponding elements for constants
-    this.state.constants.push({"name":String.fromCharCode(index),"min":0,"max":1,"value":.5,"step":.1,"switch":0})
-    this.setState({constants:this.state.constants})
+    this.state.constants.push({"name":String.fromCharCode(index),"min":0,"max":1,"value":.5,"step":.1,"switch":0});
+    this.setState({constants:this.state.constants});
   }
   //being phased out instead using slice with .map
 
@@ -195,7 +202,7 @@ class App extends React.Component {
 
   render() {
     //render function. Three different divs for different types of functions
-    var that = this
+    var that = this;
 
     return ( 
       <div className="App">
@@ -205,6 +212,52 @@ class App extends React.Component {
            <br />
            <text>dy/dx = </text>
            <input type ="text" id = "derivative"/>
+           <br />
+           <output>dx = </output>
+            <input id = {"sfga0s"} value={that.state.sfg.dx} type="text" onChange = {function(){
+                that.state.sfg.dx = document.getElementById("sfga0s").value;
+                that.setState({sfg:that.state.sfg});
+            }} />
+           <br />
+           <output>min:</output>
+           <input id = {"sfgbs"} value={that.state.sfg.mindx} type="text" onChange = {function(){
+                      that.state.sfg.mindx = document.getElementById("sfgbs").value;
+                      that.setState({sfg:that.state.sfg});
+                  }} />
+           <input type="range" id={"sfgce0"} value={that.state.sfg.dx} step={that.state.sfg.step} min={that.state.sfg.mindx} max={that.state.sfg.maxdx} onChange={
+                    function() {
+                      that.state.sfg.dx = document.getElementById("sfgce0").value;
+                      that.setState({sfg:that.state.sfg});
+                    }
+                  } />
+           <output>max:</output>
+                  <input id = {"sfgde0"} value={that.state.sfg.maxdx} type="text" onChange = {function(){
+                      that.state.maxdx = document.getElementById("sfgde0").value;
+                      that.setState({sfg:that.state.sfg});
+                  }} />
+           <br />
+           <output>dy = </output>
+                  <input id = {"sfga0e"} value={that.state.sfg.dy} type="text" onChange = {function(){
+                      that.state.sfg.dy = document.getElementById("sfga0e").value;
+                      that.setState({sfg:that.state.sfg});
+                  }} />
+           <br />
+           <output>min:</output>
+           <input id = {"sfgbe"} value={that.state.sfg.mindy} type="text" onChange = {function(){
+                      that.state.sfg.mindy = document.getElementById("sfgbe").value;
+                      that.setState({sfg:that.state.sfg});
+                  }} />
+           <input type="range" id={"sfgce"} value={that.state.sfg.dy} step={that.state.sfg.step} min={that.state.sfg.mindy} max={that.state.sfg.maxdy} onChange={
+                    function() {
+                      that.state.sfg.dy = document.getElementById("sfgce").value;
+                      that.setState({sfg:that.state.sfg});
+                    }
+                  } />
+           <output>max:</output>
+                  <input id = {"sfgde"} value={that.state.sfg.maxdy} type="text" onChange = {function(){
+                      that.state.sfg.maxdy = document.getElementById("sfgde").value;
+                      that.setState({sfg:that.state.sfg});
+                  }} />      
            <br /> <br />
          </div>
 
@@ -248,24 +301,24 @@ class App extends React.Component {
                   <output id = {String(index)+"se"} >{inputObject.name} </output>
                   <output> = </output>
                   <input id = {String(index)+"ae"} value={inputObject.value} type="text" onChange = {function(){
-                      inputObject.value = document.getElementById(String(index)+"ae").value
-                      that.setState({eulers:that.state.eulers})
+                      inputObject.value = document.getElementById(String(index)+"ae").value;
+                      that.setState({eulers:that.state.eulers});
                   }} />
                   <output> num: </output>
                   <input id = {String(index)+"nume"} value={inputObject.num} type="text" onChange = {function(){
-                      inputObject.num = document.getElementById(String(index)+"nume").value
-                      that.setState({eulers:that.state.eulers})
+                      inputObject.num = document.getElementById(String(index)+"nume").value;
+                      that.setState({eulers:that.state.eulers});
                   }} />
                   <br />
                   <output>dx = </output>
                   <input id = {String(index)+"a0e"} value={inputObject.dx} type="text" onChange = {function(){
-                      inputObject.dx = document.getElementById(String(index)+"a0e").value
-                      that.setState({eulers:that.state.eulers})
+                      inputObject.dx = document.getElementById(String(index)+"a0e").value;
+                      that.setState({eulers:that.state.eulers});
                   }} />
                   <output> x0 = </output>
                   <input id = {String(index)+"x0e"} value={inputObject.x0} type="text" onChange = {function(){
-                      inputObject.x0 = document.getElementById(String(index)+"x0e").value
-                      that.setState({eulers:that.state.eulers})
+                      inputObject.x0 = document.getElementById(String(index)+"x0e").value;
+                      that.setState({eulers:that.state.eulers});
                   }} />
                   <output> y0 = </output>
                   <input id = {String(index)+"y0e"} value={inputObject.y0} type="text" onChange = {function(){
@@ -274,38 +327,38 @@ class App extends React.Component {
                   }} />
                   <br />
                   <output>min:</output>
-                  <input id = {String(index)+"bc"} value={inputObject.min} type="text" onChange = {function(){
-                      inputObject.min = document.getElementById(String(index)+"be").value
-                      that.setState({eulers:that.state.eulers})
+                  <input id = {String(index)+"be"} value={inputObject.min} type="text" onChange = {function(){
+                      inputObject.min = document.getElementById(String(index)+"be").value;
+                      that.setState({eulers:that.state.eulers});
                   }} />
                   <input type="range" id={String(index)+"ce"} value={inputObject.dx} step={inputObject.step} min={inputObject.min} max={inputObject.max} onChange={
                     function() {
-                      inputObject.dx = document.getElementById(String(index)+"ce").value
-                      that.setState({eulers:that.state.eulers})
+                      inputObject.dx = document.getElementById(String(index)+"ce").value;
+                      that.setState({eulers:that.state.eulers});
                     }
                   } />
                   <output>max:</output>
                   <input id = {String(index)+"de"} value={inputObject.max} type="text" onChange = {function(){
-                      inputObject.max = document.getElementById(String(index)+"de").value
-                      that.setState({eulers:that.state.eulers})
+                      inputObject.max = document.getElementById(String(index)+"de").value;
+                      that.setState({eulers:that.state.eulers});
                   }} />
                   <output>step:</output>
                   <input id = {String(index)+"ee"} value={inputObject.step} type="text" onChange = {function(){
-                      inputObject.step = document.getElementById(String(index)+"ee").value
-                      that.setState({eulers:that.state.eulers})
+                      inputObject.step = document.getElementById(String(index)+"ee").value;
+                      that.setState({eulers:that.state.eulers});
                   }} />
                   <button onClick ={
                     function() {
                       inputObject.switch=(inputObject.switch+1)%2;
-                      that.setState({eulers:that.state.eulers})
+                      that.setState({eulers:that.state.eulers});
                       //will do something
                     }
                   }>{String.fromCharCode(that.state.switch[inputObject.switch],that.state.switch[inputObject.switch+2])}</button>
                   <button onClick={
                     function() {
-                      that.state.eulers.splice(index,1)
+                      that.state.eulers.splice(index,1);
                       that.state.euleroffset++;
-                      that.setState({eulers:that.state.eulers})
+                      that.setState({eulers:that.state.eulers});
                     }
                   } >-</button>
                   <br />
@@ -324,48 +377,48 @@ class App extends React.Component {
               return (
                 <div>
                   <input id = {String(index)+"sc"} value={inputObject.name} type="text" onChange = {function(){
-                      inputObject.name = document.getElementById(String(index)+"sc").value
-                      that.setState({constants:that.state.constants})
+                      inputObject.name = document.getElementById(String(index)+"sc").value;
+                      that.setState({constants:that.state.constants});
                   }} />
                   <output>=</output>
                   <input id = {String(index)+"ac"} value={inputObject.value} type="text" onChange = {function(){
-                      inputObject.value = document.getElementById(String(index)+"ac").value
-                      that.setState({constants:that.state.constants})
+                      inputObject.value = document.getElementById(String(index)+"ac").value;
+                      that.setState({constants:that.state.constants});
                   }} />
                   <br />
                   <output>min:</output>
                   <input id = {String(index)+"bc"} value={inputObject.min} type="text" onChange = {function(){
-                      inputObject.min = document.getElementById(String(index)+"bc").value
-                      that.setState({constants:that.state.constants})
+                      inputObject.min = document.getElementById(String(index)+"bc").value;
+                      that.setState({constants:that.state.constants});
                   }} />
                   <input type="range" id={String(index)+"cc"} value={inputObject.value} step={inputObject.step} min={inputObject.min} max={inputObject.max} onChange={
                     function() {
-                      inputObject.value = document.getElementById(String(index)+"cc").value
-                      that.setState({constants:that.state.constants})
+                      inputObject.value = document.getElementById(String(index)+"cc").value;
+                      that.setState({constants:that.state.constants});
                     }
                   } />
                   <output>max:</output>
                   <input id = {String(index)+"dc"} value={inputObject.max} type="text" onChange = {function(){
-                      inputObject.max = document.getElementById(String(index)+"dc").value
-                      that.setState({constants:that.state.constants})
+                      inputObject.max = document.getElementById(String(index)+"dc").value;
+                      that.setState({constants:that.state.constants});
                   }} />
                   <output>step:</output>
                   <input id = {String(index)+"ec"} value={inputObject.step} type="text" onChange = {function(){
-                      inputObject.step = document.getElementById(String(index)+"ec").value
-                      that.setState({constants:that.state.constants})
+                      inputObject.step = document.getElementById(String(index)+"ec").value;
+                      that.setState({constants:that.state.constants});
                   }} />
                   <button onClick ={
                     function() {
                       inputObject.switch=(inputObject.switch+1)%2;
-                      that.setState({constants:that.state.constants})
+                      that.setState({constants:that.state.constants});
                       //will do something
                     }
                   }>{String.fromCharCode(that.state.switch[inputObject.switch],that.state.switch[inputObject.switch+2])}</button>
                   <button onClick={
                     function() {
-                      that.state.constants.splice(index,1)
+                      that.state.constants.splice(index,1);
                       that.state.constoffset++;
-                      that.setState({constants:that.state.constants})
+                      that.setState({constants:that.state.constants});
                     }
                   } >-</button>
                   <br />
