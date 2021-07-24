@@ -256,6 +256,17 @@ class App extends React.Component {
                       that.state.sfg.maxdy = document.getElementById("sfgde").value;
                       that.setState({sfg:that.state.sfg});
                   }} />  
+          <output>step:</output>
+                  <input id = "sfgec"} value={that.state.sfg.step} type="text" onChange = {function(){
+                      that.state.sfg.step = document.getElementById("sfgec").value;
+                      that.setState({constants:that.state.constants});
+                  }} />
+                  <button onClick ={
+                    function() {
+                      inputObject.switch=(inputObject.switch+1)%2;
+                      that.setState({constants:that.state.constants});
+                      //will do something
+                    }
           <br /> 
           <output>len = </output>
                   <input id = {"sfga0e1"} value={that.state.sfg.len} type="text" onChange = {function(){
