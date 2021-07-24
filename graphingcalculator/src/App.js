@@ -5,10 +5,8 @@ import { create, all } from 'mathjs';
 const math = create(all); 
 
 //to do 
-//syntax (:)
 //get play button working (use sleep -- try to multithread during sleep?)
-//add sliders/preferences for slope field generator (need to also update visualiztion but should be easy since there is 1)
-//maybe limit number of calculations by bounding the number of eler methods? not sure necessary
+//add limits to dx/dy
 //add textboxes (+hopefully scroll wheel) for boundaries of graph
 //update VISUALIZATION! create an update graph function that is more efficient (likely will require keeping track of places in array)
   //this should hopefully help with naming/keeping track of colors in the legend
