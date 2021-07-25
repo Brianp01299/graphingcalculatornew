@@ -1,5 +1,5 @@
 import './App.css';
-import React from "react";
+import React, {useEffect} from "react";
 import Component from "react";
 import { create, all } from 'mathjs';
 const math = create(all); 
@@ -22,6 +22,7 @@ const math = create(all);
 class App extends React.Component {
 
   constructor(props) {
+    var d = new Date()
     super(props)
     this.state = {
       "minX": 0, //minmaxXY for visualization
@@ -37,7 +38,8 @@ class App extends React.Component {
       "dataY":[],
       "arr":[],      
       "functions":[{"value":"x","name":"y"}],//array of functions
-      "eulers":[{"min":0,"max":1,"value":"2*x","step":.1,"name":'dy/dx','num':10,"switch":0,"dx":.1, "x0":0,"y0":0}],
+      "time":d.getTime(),
+      "eulers":[{"min":0,"max":1,"value":"2*x","step":.1,"name":'dy/dx','num':10,"switch":0,"dx":.1, "x0":0,"y0":0,"time":0}],
       "constants":[{"min":0,"max":1,"value":.5,"step":.1,"name":'a',"switch":0}],//array of constants starts with 1 constant 'a'
       "switch":[9654 , 10074,"",10074],//used for the switch for paus/play button
       "fcnoffset":0,//offsets for constants, eulers and functions so can keep track of deleted arrays when making new ones so there
@@ -53,6 +55,8 @@ class App extends React.Component {
     return math.compile(expression).evaluate(scope);
   }
 
+
+
   produceDataPointsE(derivative,scope,object) {  
     //produces a set of data points stored in state variables dataX/Y to be visualized 
     //as an antiderivative using euler's method
@@ -66,6 +70,10 @@ class App extends React.Component {
       y= y+(this.evaluateExpression(i*dx+x0,y,derivative,scope)*dx);
       this.state.dataY.push(y);     
     }
+  }
+
+  async step(inputObject) {
+
   }
 
   produceDataPointsS(derivative,scope) {
@@ -88,6 +96,8 @@ class App extends React.Component {
       }
     }
   }
+
+
 
   produceDataPointsF(fcn,scope) {
     //creates a function trace based on 1000 pts.
@@ -125,7 +135,7 @@ class App extends React.Component {
   
   addEuler(index) {
     //dito for eulers
-    this.state.eulers.push({"min":0,"max":1,"value":"2*x","step":.1,"name":'dy/dx'+String(index),'num':10,"switch":0,"dx":.1, "x0":0,"y0":0});
+    this.state.eulers.push({"min":0,"max":1,"value":"2*x","step":.1,"time":0,"name":'dy/dx'+String(index),'num':10,"switch":0,"dx":.1, "x0":0,"y0":0});
     this.setState({eulers:this.state.eulers});
 
   }
@@ -200,11 +210,27 @@ class App extends React.Component {
     }
 
   }
+  componentDidMount() {
+    var that = this
+    setInterval(function(){
+        for (var i=0;i<that.state.eulers.length;i++) {
+          if(that.state.eulers[i].switch===1) {
+            if(that.state.eulers[i].dx>that.state.eulers[i].max) {
+              that.state.eulers[i].dx=that.state.eulers[i].min
+              that.setState({eulers:that.state.eulers})
+            }
+            that.state.eulers[i].dx=String(parseFloat(that.state.eulers[i].dx)+parseFloat(that.state.eulers[i].step))
+            that.setState({eulers:that.state.eulers})
+          }
+        }
+      }, 1000);
+    }
 
 
   render() {
     //render function. Three different divs for different types of functions
     var that = this;
+    
 
     return ( 
       <div className="App">
@@ -248,7 +274,9 @@ class App extends React.Component {
            <text>dy/dx = </text>
            <input type ="text" id = "derivative"/>
            <br />
-           {that.state.sfg.sliders.map((inputObject,index) => {
+           {
+
+            that.state.sfg.sliders.map((inputObject,index) => {
               return (
                 <div>
                   <output>{inputObject.name} </output>
@@ -294,8 +322,14 @@ class App extends React.Component {
            <text>Euler's Method</text>
            {
              that.state.eulers.map((inputObject,index) => {
+              if (inputObject.switch===1) {
+                inputObject.dx=String(parseFloat(inputObject.dx)+parseFloat(inputObject.step))
+                //that.setState({eulers:that.state.eulers})
+              }
+             
               return (
-                <div>
+                
+                <div>                  
                   <output id = {String(index)+"se"} >{inputObject.name} </output>
                   <output> = </output>
                   <input id = {String(index)+"ae"} value={inputObject.value} type="text" onChange = {function(){
@@ -334,7 +368,8 @@ class App extends React.Component {
                       inputObject.dx = document.getElementById(String(index)+"ce").value;
                       that.setState({eulers:that.state.eulers});
                     }
-                  } />
+                  }
+                  />
                   <output>max:</output>
                   <input id = {String(index)+"de"} value={inputObject.max} type="text" onChange = {function(){
                       inputObject.max = document.getElementById(String(index)+"de").value;
@@ -348,6 +383,7 @@ class App extends React.Component {
                   <button onClick ={
                     function() {
                       inputObject.switch=(inputObject.switch+1)%2;
+                      //inputObject.dx = String(parseFloat(inputObject.dx)+parseFloat(inputObject.step))
                       that.setState({eulers:that.state.eulers});
                       //will do something
                     }
@@ -360,6 +396,7 @@ class App extends React.Component {
                     }
                   } >-</button>
                   <br />
+                  
                 </div>
               )
            })
