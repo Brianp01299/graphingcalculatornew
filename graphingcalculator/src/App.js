@@ -214,21 +214,47 @@ class App extends React.Component {
     var that = this
     
     this.interval = setInterval(function(){
+      //every second if the + button is pressed uses the timer to run through eaach slider.
+        for (var i=0;i<that.state.sfg.sliders.length;i++) {
+          var value = parseFloat(that.state.sfg.sliders.[i].value);
+          var max = parseFloat(that.state.sfg.sliders.[i].max);
+          var min = parseFloat(that.state.sfg.sliders.[i].min);
+          var step = parseFloat(that.state.sfg.sliders.[i].step);
+          if(that.state.sfg.sliders.[i].switch===1) {
+            if(value>=max-step) {
+              that.state.sfg.sliders.[i].value=(min-step).toFixed(2);
+              value=min-step
+            }
+            that.state.sfg.sliders.[i].value=(value+step).toFixed(2);
+            that.setState({sliders:that.state.sliders})
+          }
+           }
         for (var i=0;i<that.state.eulers.length;i++) {
-          //var i =0
-          var dx = parseFloat(that.state.eulers[i].dx)
-          var max = parseFloat(that.state.eulers[i].max)
-          var min = parseFloat(that.state.eulers[i].min)
-          var step = parseFloat(that.state.eulers[i].step)
+          var dx = parseFloat(that.state.eulers[i].dx);
+          var max = parseFloat(that.state.eulers[i].max);
+          var min = parseFloat(that.state.eulers[i].min);
+          var step = parseFloat(that.state.eulers[i].step);
           if(that.state.eulers[i].switch===1) {
             if(dx>=max-step) {
-              //console.log(dx)
-              that.state.eulers[i].dx=(min-step).toFixed(2)
+              that.state.eulers[i].dx=(min-step).toFixed(2);
               dx=min-step
-              //that.setState({eulers:that.state.eulers})
             }
-            that.state.eulers[i].dx=(dx+step).toFixed(2)
+            that.state.eulers[i].dx=(dx+step).toFixed(2);
             that.setState({eulers:that.state.eulers})
+          }
+           }
+        for (var i=0;i<that.state.constants.length;i++) {
+          var value = parseFloat(that.state.constants[i].value); 
+          var max = parseFloat(that.state.constants[i].max);
+          var min = parseFloat(that.state.constants[i].min);
+          var step = parseFloat(that.state.constants[i].step);
+          if(that.state.constants[i].switch===1) {
+            if(value>=max-step) {
+              that.state.constants[i].value=(min-step).toFixed(2);
+              value=min-step
+            }
+            that.state.constants[i].value=(value+step).toFixed(2);
+            that.setState({constants:that.state.constants})
           }
            }
       }, 1000);
