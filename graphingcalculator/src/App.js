@@ -212,19 +212,30 @@ class App extends React.Component {
   }
   componentDidMount() {
     var that = this
-    setInterval(function(){
+    
+    this.interval = setInterval(function(){
         for (var i=0;i<that.state.eulers.length;i++) {
+          //var i =0
+          var dx = parseFloat(that.state.eulers[i].dx)
+          var max = parseFloat(that.state.eulers[i].max)
+          var min = parseFloat(that.state.eulers[i].min)
+          var step = parseFloat(that.state.eulers[i].step)
           if(that.state.eulers[i].switch===1) {
-            if(that.state.eulers[i].dx>that.state.eulers[i].max) {
-              that.state.eulers[i].dx=that.state.eulers[i].min
-              that.setState({eulers:that.state.eulers})
+            if(dx>=max-step) {
+              //console.log(dx)
+              that.state.eulers[i].dx=(min-step).toFixed(2)
+              dx=min-step
+              //that.setState({eulers:that.state.eulers})
             }
-            that.state.eulers[i].dx=String(parseFloat(that.state.eulers[i].dx)+parseFloat(that.state.eulers[i].step))
+            that.state.eulers[i].dx=(dx+step).toFixed(2)
             that.setState({eulers:that.state.eulers})
           }
-        }
+           }
       }, 1000);
     }
+  componentWillUnmount() {
+   clearTimeout(this.interval());
+ }
 
 
   render() {
@@ -322,10 +333,7 @@ class App extends React.Component {
            <text>Euler's Method</text>
            {
              that.state.eulers.map((inputObject,index) => {
-              if (inputObject.switch===1) {
-                inputObject.dx=String(parseFloat(inputObject.dx)+parseFloat(inputObject.step))
-                //that.setState({eulers:that.state.eulers})
-              }
+              
              
               return (
                 
