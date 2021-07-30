@@ -5,7 +5,6 @@ import { create, all } from 'mathjs';
 const math = create(all); 
 
 //to do 
-//get play button working (use sleep -- try to multithread during sleep?)
 //add limits to dx/dy
 //add textboxes (+hopefully scroll wheel) for boundaries of graph
 //update VISUALIZATION! create an update graph function that is more efficient (likely will require keeping track of places in array)
@@ -221,7 +220,7 @@ class App extends React.Component {
           var min = parseFloat(that.state.sfg.sliders.[i].min);
           var step = parseFloat(that.state.sfg.sliders.[i].step);
           if(that.state.sfg.sliders.[i].switch===1) {
-            if(value>=max-step) {
+            if(value>max-step) {
               that.state.sfg.sliders.[i].value=(min-step).toFixed(2);
               value=min-step
             }
@@ -235,7 +234,7 @@ class App extends React.Component {
           var min = parseFloat(that.state.eulers[i].min);
           var step = parseFloat(that.state.eulers[i].step);
           if(that.state.eulers[i].switch===1) {
-            if(dx>=max-step) {
+            if(dx>max-step) {
               that.state.eulers[i].dx=(min-step).toFixed(2);
               dx=min-step
             }
@@ -249,7 +248,7 @@ class App extends React.Component {
           var min = parseFloat(that.state.constants[i].min);
           var step = parseFloat(that.state.constants[i].step);
           if(that.state.constants[i].switch===1) {
-            if(value>=max-step) {
+            if(value>max-step) {
               that.state.constants[i].value=(min-step).toFixed(2);
               value=min-step
             }
@@ -268,7 +267,6 @@ class App extends React.Component {
     //render function. Three different divs for different types of functions
     var that = this;
     
-
     return ( 
       <div className="App">
          <header className="App-header">
