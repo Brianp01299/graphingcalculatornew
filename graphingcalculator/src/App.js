@@ -36,6 +36,7 @@ class App extends React.Component {
       "dataX":[],//dataX/Y are arrays used to append arr (generic array) for data points and trances.
       "dataY":[],
       "arr":[],      
+      "arr_2":[],
       "functions":[{"value":"x","name":"y"}],//array of functions
       "time":d.getTime(),
       "eulers":[{"min":0,"max":1,"value":"2*x","step":.1,"name":'dy/dx','num':10,"switch":0,"dx":.1, "x0":0,"y0":0,"time":0}],
@@ -61,6 +62,7 @@ class App extends React.Component {
     //as an antiderivative using euler's method
     this.state.dataX = [];
     this.state.dataY = [];
+    
     var y = parseFloat(object.y0);
     var x0 = parseFloat(object.x0);
     var dx = parseFloat(object.dx);
@@ -71,15 +73,14 @@ class App extends React.Component {
     }
   }
 
-  async step(inputObject) {
-
-  }
+  
 
   produceDataPointsS(derivative,scope) {
     //produces sets of 4 points (2x,2y) to generate a slope field stored 
     //in state virables arr
     var that =this;
     that.state.arr = [];
+    this.state.arr_2=[];
     var dx=parseFloat(that.state.sfg.sliders[0].value);
     var dy=parseFloat(that.state.sfg.sliders[1].value);
     var len=parseFloat(that.state.sfg.sliders[2].value);
@@ -114,13 +115,30 @@ class App extends React.Component {
   make_trace({data, set_type = "scatter", set_mode = "lines"} = {}){
     //makes data points into correct format for visualization
     let dataPoint = [];
+    for(let i = 0; i<data.length; i+=3){
+      dataPoint.push({
+                  x: data[i],
+                  y: data[i+1],
+                  mode: set_mode,
+                  type: set_type,
+                  name: data[i+2]
+              });
+    }
+    return dataPoint;
+  }
+
+  make_sfg_trace({data, set_type = "scatter", set_mode = "lines"} = {}){
+    //makes data points into correct format for visualization
+    let dataPoint = [];
     for(let i = 0; i<data.length; i+=2){
       dataPoint.push({
                   x: data[i],
                   y: data[i+1],
                   mode: set_mode,
                   type: set_type,
-                  name: 'y_' + i/2
+                  showlegend: false,
+                  line: {color:'blue'},
+                  //name: 'y_' + i/2
               });
     }
     return dataPoint;
@@ -179,15 +197,17 @@ class App extends React.Component {
       //produce traces for functions.
       for (var i = 0;i<this.state.functions.length;i++) {
         this.produceDataPointsF(String(this.state.functions[i].value),scope);
-        this.state.arr.push(this.state.dataX);
-        this.state.arr.push(this.state.dataY);
+        this.state.arr_2.push(this.state.dataX);
+        this.state.arr_2.push(this.state.dataY);
+        this.state.arr_2.push(this.state.functions[i].name)
         
       }
       //produces eulers method traces
       for (var i = 0;i<this.state.eulers.length;i++) {
         this.produceDataPointsE(this.state.eulers[i].value,scope,this.state.eulers[i]);
-        this.state.arr.push(this.state.dataX);
-        this.state.arr.push(this.state.dataY);
+        this.state.arr_2.push(this.state.dataX);
+        this.state.arr_2.push(this.state.dataY);
+        this.state.arr_2.push(this.state.eulers[i].name)
       }
 
 
@@ -202,7 +222,13 @@ class App extends React.Component {
           showline: false
         }
       };  
-      window.Plotly.newPlot(graphDiv, this.make_trace({data:this.state.arr,set_type:"scatter", set_mode : "lines"}), layout);
+      var sfg_plots = this.make_sfg_trace({data:this.state.arr,set_type:"scatter", set_mode : "lines"})
+      var other_plot = this.make_trace({data:this.state.arr_2,set_type:"scatter", set_mode : "lines"})
+      for (var i = 0;i<other_plot.length;i++) {
+        sfg_plots.push(other_plot[i])
+      }
+
+      window.Plotly.newPlot(graphDiv, sfg_plots, layout);
     } catch(e) {
       alert(e);
      // console.log(e)
