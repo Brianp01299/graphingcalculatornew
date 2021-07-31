@@ -8,9 +8,7 @@ const math = create(all);
 //add limits to dx/dy
 //add textboxes (+hopefully scroll wheel) for boundaries of graph
 //update VISUALIZATION! create an update graph function that is more efficient (likely will require keeping track of places in array)
-  //this should hopefully help with naming/keeping track of colors in the legend
 //long term/less important: 
-//color(especially sfg)
 //vertical lines (maybe check functinosn if name==='x' change the visualiztion to rely on y rather than x)
 //produce csv of data points
 //move clear button to bottom of graph/get rid of graph button bc updates will happen faster (easy result of harder earlier update fcn)
@@ -45,6 +43,7 @@ class App extends React.Component {
       "fcnoffset":0,//offsets for constants, eulers and functions so can keep track of deleted arrays when making new ones so there
       "constoffset":97, //is not an overlap of default names.
       "euleroffset":0,
+      "length":0
     }
   }
   //using mathjs evaluates a mathematical expression and a scope
@@ -52,7 +51,11 @@ class App extends React.Component {
   evaluateExpression(tx, ty, expression,scope) {
     scope['x'] = tx;
     scope['y'] = ty;
-    return math.compile(expression).evaluate(scope);
+    try {
+     return math.compile(expression).evaluate(scope);
+    } catch(e) {
+      return 0
+    }
   }
 
 
@@ -138,7 +141,6 @@ class App extends React.Component {
                   type: set_type,
                   showlegend: false,
                   line: {color:'blue'},
-                  //name: 'y_' + i/2
               });
     }
     return dataPoint;
@@ -227,6 +229,7 @@ class App extends React.Component {
       for (var i = 0;i<other_plot.length;i++) {
         sfg_plots.push(other_plot[i])
       }
+      this.state.length=sfg_plots.length;
 
       window.Plotly.newPlot(graphDiv, sfg_plots, layout);
     } catch(e) {
@@ -235,8 +238,72 @@ class App extends React.Component {
     }
 
   }
+
+  update() {
+    //visualizes data points using plotly
+    try {
+      var graphDiv = document.getElementById('graph');
+      let scope = {};
+      //create the scope by evaluating the constants.
+      for (var i = 0;i<this.state.constants.length;i++) {
+        scope[this.state.constants[i].name] = math.compile(this.state.constants[i].value).evaluate(scope);
+        
+      }
+      
+      this.produceDataPointsS(document.getElementById("derivative").value,scope); //produce the slope field generator traces
+      //produce traces for functions.
+      for (var i = 0;i<this.state.functions.length;i++) {
+        this.produceDataPointsF(String(this.state.functions[i].value),scope);
+        this.state.arr_2.push(this.state.dataX);
+        this.state.arr_2.push(this.state.dataY);
+        this.state.arr_2.push(this.state.functions[i].name)
+        //this.setState({arr_2:this.state.arr_2})
+        
+      }
+
+      //produces eulers method traces
+      for (var i = 0;i<this.state.eulers.length;i++) {
+        this.produceDataPointsE(this.state.eulers[i].value,scope,this.state.eulers[i]);
+        this.state.arr_2.push(this.state.dataX);
+        this.state.arr_2.push(this.state.dataY);
+        this.state.arr_2.push(this.state.eulers[i].name)
+        //this.setState({arr_2:this.state.arr_2})
+      }
+
+
+      var layout = {
+        xaxis: {
+          title: 'x',
+          showgrid: false,
+          zeroline: false
+        },
+        yaxis: {
+          title: 'y',
+          showline: false
+        }
+      };  
+      var sfg_plots = this.make_sfg_trace({data:this.state.arr,set_type:"scatter", set_mode : "lines"})
+      var other_plot = this.make_trace({data:this.state.arr_2,set_type:"scatter", set_mode : "lines"})
+      for (var i = 0;i<other_plot.length;i++) {
+        sfg_plots.push(other_plot[i])
+      }
+      var remove = []
+      for (var i =0;i<this.state.length;i++) {
+        remove.push(i)
+
+      }
+      window.Plotly.deleteTraces(graphDiv,remove);
+      window.Plotly.addTraces(graphDiv,sfg_plots)
+      this.state.length=sfg_plots.length;
+    } catch(e) {
+      alert(e);
+     // console.log(e)
+    }
+
+  }
   componentDidMount() {
     var that = this
+    that.graph()
     
     this.interval = setInterval(function(){
       //every second if the + button is pressed uses the timer to run through eaach slider.
@@ -282,6 +349,7 @@ class App extends React.Component {
             that.setState({constants:that.state.constants})
           }
            }
+          that.update()
       }, 1000);
     }
   componentWillUnmount() {
