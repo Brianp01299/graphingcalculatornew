@@ -287,6 +287,7 @@ class App extends React.Component {
       for (var i = 0;i<other_plot.length;i++) {
         sfg_plots.push(other_plot[i])
       }
+      console.log(this.state.length);
       var remove = []
       for (var i =0;i<this.state.length;i++) {
         remove.push(i)
@@ -295,9 +296,11 @@ class App extends React.Component {
       window.Plotly.deleteTraces(graphDiv,remove);
       window.Plotly.addTraces(graphDiv,sfg_plots)
       this.state.length=sfg_plots.length;
+      //this.setState({length:this.state.length})
+      //console.log(length)
     } catch(e) {
-      alert(e);
-     // console.log(e)
+      //alert(e);
+      console.log(e)
     }
 
   }
