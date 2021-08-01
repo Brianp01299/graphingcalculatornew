@@ -4,6 +4,22 @@ import Component from "react";
 import { create, all } from 'mathjs';
 const math = create(all); 
 
+math.import({
+  ddx: function (fcn,tx) {
+    var dx = .001
+    return ((math.compile(fcn).evaluate({'x':tx+dx})-math.compile(fcn).evaluate({'x':tx-dx}))/(2*dx)).toFixed(5)
+  },
+
+  int: function integrals(fcn,a,b) {
+    var dx = .005
+    var dir = 1;
+    if (a>=b-dx) {
+      return 0
+    }
+    return integrals(fcn,a+dx,b) + (math.compile(fcn).evaluate({'x':a})+math.compile(fcn).evaluate({'x':a+dx}))*dx/2
+  } 
+})
+
 //to do 
 //add limits to dx/dy
 //add textboxes (+hopefully scroll wheel) for boundaries of graph
@@ -51,11 +67,12 @@ class App extends React.Component {
     scope['x'] = tx;
     scope['y'] = ty;
     try {
-     return math.compile(expression).evaluate(scope);
+     return math.compile(expression).evaluate(scope).toFixed(2);
     } catch(e) {
       return 0
     }
   }
+
 
 
 
@@ -228,9 +245,7 @@ class App extends React.Component {
         this.produceDataPointsF(String(this.state.functions[i].value),scope);
         this.state.arr_2.push(this.state.dataX);
         this.state.arr_2.push(this.state.dataY);
-        this.state.arr_2.push(this.state.functions[i].name)
-        //this.setState({arr_2:this.state.arr_2})
-        
+        this.state.arr_2.push(this.state.functions[i].name)     
       }
 
       //produces eulers method traces
@@ -239,7 +254,6 @@ class App extends React.Component {
         this.state.arr_2.push(this.state.dataX);
         this.state.arr_2.push(this.state.dataY);
         this.state.arr_2.push(this.state.eulers[i].name)
-        //this.setState({arr_2:this.state.arr_2})
       }
 
 
@@ -259,7 +273,6 @@ class App extends React.Component {
       for (var i = 0;i<other_plot.length;i++) {
         sfg_plots.push(other_plot[i])
       }
-      console.log(this.state.length);
       var remove = []
       for (var i =0;i<this.state.length;i++) {
         remove.push(i)
@@ -268,17 +281,15 @@ class App extends React.Component {
       window.Plotly.deleteTraces(graphDiv,remove);
       window.Plotly.addTraces(graphDiv,sfg_plots)
       this.state.length=sfg_plots.length;
-      //this.setState({length:this.state.length})
-      //console.log(length)
     } catch(e) {
-      //alert(e);
-      console.log(e)
+      alert(e);
+      //console.log(e)
     }
 
   }
   componentDidMount() {
     var that = this
-    that.graph()
+    this.graph()
     
     this.interval = setInterval(function(){
       //every second if the + button is pressed uses the timer to run through eaach slider.
@@ -335,7 +346,6 @@ class App extends React.Component {
   render() {
     //render function. Three different divs for different types of functions
     var that = this;
-    
     return ( 
       <div className="App">
          <header className="App-header">
