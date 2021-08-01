@@ -7,7 +7,6 @@ const math = create(all);
 //to do 
 //add limits to dx/dy
 //add textboxes (+hopefully scroll wheel) for boundaries of graph
-//update VISUALIZATION! create an update graph function that is more efficient (likely will require keeping track of places in array)
 //long term/less important: 
 //vertical lines (maybe check functinosn if name==='x' change the visualiztion to rely on y rather than x)
 //produce csv of data points
@@ -592,13 +591,7 @@ class App extends React.Component {
           }
            <button onClick = {function(){that.addConstant(that.state.constants.length+that.state.constoffset);}}>+</button>
         <br /> 
-        </div>
-
-         <div id = "run">
-          <button onClick = {function(){that.graph()}}> run </button>
-          <button onClick = {function(){that.clear()}}> clear </button>
-         </div>
-         
+        </div>         
          <div id = "graph"></div>
 
         </header>
