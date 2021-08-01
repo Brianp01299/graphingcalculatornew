@@ -63,8 +63,7 @@ class App extends React.Component {
     //produces a set of data points stored in state variables dataX/Y to be visualized 
     //as an antiderivative using euler's method
     this.state.dataX = [];
-    this.state.dataY = [];
-    
+    this.state.dataY = [];  
     var y = parseFloat(object.y0);
     var x0 = parseFloat(object.x0);
     var dx = parseFloat(object.dx);
@@ -187,31 +186,6 @@ class App extends React.Component {
     //visualizes data points using plotly
     try {
       var graphDiv = document.getElementById('graph');
-      let scope = {};
-      //create the scope by evaluating the constants.
-      for (var i = 0;i<this.state.constants.length;i++) {
-        scope[this.state.constants[i].name] = math.compile(this.state.constants[i].value).evaluate(scope);
-        
-      }
-      
-      this.produceDataPointsS(document.getElementById("derivative").value,scope); //produce the slope field generator traces
-      //produce traces for functions.
-      for (var i = 0;i<this.state.functions.length;i++) {
-        this.produceDataPointsF(String(this.state.functions[i].value),scope);
-        this.state.arr_2.push(this.state.dataX);
-        this.state.arr_2.push(this.state.dataY);
-        this.state.arr_2.push(this.state.functions[i].name)
-        
-      }
-      //produces eulers method traces
-      for (var i = 0;i<this.state.eulers.length;i++) {
-        this.produceDataPointsE(this.state.eulers[i].value,scope,this.state.eulers[i]);
-        this.state.arr_2.push(this.state.dataX);
-        this.state.arr_2.push(this.state.dataY);
-        this.state.arr_2.push(this.state.eulers[i].name)
-      }
-
-
       var layout = {
         xaxis: {
           title: 'x',
@@ -229,7 +203,6 @@ class App extends React.Component {
         sfg_plots.push(other_plot[i])
       }
       this.state.length=sfg_plots.length;
-
       window.Plotly.newPlot(graphDiv, sfg_plots, layout);
     } catch(e) {
       alert(e);
