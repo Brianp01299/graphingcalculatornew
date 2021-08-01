@@ -6,7 +6,7 @@ const math = create(all);
 
 math.import({
   ddx: function (fcn,tx) {
-    var dx = .001
+    var dx = .005
     return ((math.compile(fcn).evaluate({'x':tx+dx})-math.compile(fcn).evaluate({'x':tx-dx}))/(2*dx)).toFixed(5)
   },
 
@@ -25,8 +25,9 @@ math.import({
 //add textboxes (+hopefully scroll wheel) for boundaries of graph
 //long term/less important: 
 //vertical lines (maybe check functinosn if name==='x' change the visualiztion to rely on y rather than x)
-//produce csv of data points
-//move clear button to bottom of graph/get rid of graph button bc updates will happen faster (easy result of harder earlier update fcn)
+//produce csv of data point
+//int(fcn,0,x)dt
+//add calculation sections
 //CSS for better UI
 
 //next week create video for CHu
