@@ -590,10 +590,23 @@ class App extends React.Component {
                 <div>
                   <input id = {String(index)+"exp"} value={inputObject.expression} type="text" onChange = {function(){
                       try { 
-                        console.log(inputObject.expression)
+                        
                         inputObject.expression = document.getElementById(String(index)+"exp").value
-                        inputObject.value=math.compile(inputObject.expression).evaluate().toFixed(2)
+                        let scope = {};
+                        //create the scope by evaluating the constants.
+                        for (var i = 0;i<that.state.constants.length;i++) {
+                          scope[that.state.constants[i].name] = math.compile(that.state.constants[i].value).evaluate(scope);
+                         // console.log(1)
+                        }
+                        for (var i = 0;i<that.state.functions.length;i++) {
+                          scope[that.state.functions[i].name]= that.state.functions[i].value;
+                          
+                        }
+                        console.log(scope)
+                        inputObject.value=math.compile(inputObject.expression).evaluate(scope).toFixed(2)
+                        console.log(scope)
                         that.setState({calculations:that.state.calculations})
+                        
                       } catch 
                       {
                        inputObject.expression = document.getElementById(String(index)+"exp").value
