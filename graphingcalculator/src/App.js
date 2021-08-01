@@ -7,7 +7,7 @@ const math = create(all);
 math.import({
   ddx: function (fcn,tx) {
     var dx = .005
-    return ((math.compile(fcn).evaluate({'x':tx+dx})-math.compile(fcn).evaluate({'x':tx-dx}))/(2*dx)).toFixed(5)
+    return ((math.compile(fcn).evaluate({'x':tx+dx})-math.compile(fcn).evaluate({'x':tx-dx}))/(2*dx))
   },
 
   int: function integrals(fcn,a,b) {
@@ -29,6 +29,7 @@ math.import({
 //int(fcn,0,x)dt
 //add calculation sections
 //CSS for better UI
+//better error handlging
 
 //next week create video for CHu
 
@@ -68,7 +69,7 @@ class App extends React.Component {
     scope['x'] = tx;
     scope['y'] = ty;
     try {
-     return math.compile(expression).evaluate(scope).toFixed(2);
+     return math.compile(expression).evaluate(scope);
     } catch(e) {
       return 0
     }
