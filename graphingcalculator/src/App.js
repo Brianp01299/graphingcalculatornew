@@ -53,13 +53,14 @@ class App extends React.Component {
       "arr":[],      
       "arr_2":[],
       "functions":[{"value":"x","name":"y"}],//array of functions
-      "time":d.getTime(),
       "eulers":[{"min":0,"max":1,"value":"2*x","step":.1,"name":'dy/dx','num':10,"switch":0,"dx":.1, "x0":0,"y0":0,"time":0}],
       "constants":[{"min":0,"max":1,"value":.5,"step":.1,"name":'a',"switch":0}],//array of constants starts with 1 constant 'a'
+      "calculations":[{"expression":"","value":0}],
       "switch":[9654 , 10074,"",10074],//used for the switch for paus/play button
       "fcnoffset":0,//offsets for constants, eulers and functions so can keep track of deleted arrays when making new ones so there
       "constoffset":97, //is not an overlap of default names.
       "euleroffset":0,
+      "calcoffset":0,
       "length":0
     }
   }
@@ -181,7 +182,12 @@ class App extends React.Component {
     this.state.constants.push({"name":String.fromCharCode(index),"min":0,"max":1,"value":.5,"step":.1,"switch":0});
     this.setState({constants:this.state.constants});
   }
-  //being phased out instead using slice with .map
+
+  addCalculation() {
+    //adds a textbox and corresponding elements for calculations
+    this.state.calculations.push({"expression":"","value":0});
+    this.setState({calculations:this.state.calculations});
+  }
 
   //need to update visualiztion as right now it is very expensive CPU wise learning and researching Plotly.update()
   clear() {
@@ -323,6 +329,9 @@ class App extends React.Component {
             that.setState({eulers:that.state.eulers})
           }
            }
+        for (var i=0;i<that.state.calculations.length;i++) {
+          
+        }
         for (var i=0;i<that.state.constants.length;i++) {
           var value = parseFloat(that.state.constants[i].value); 
           var max = parseFloat(that.state.constants[i].max);
@@ -351,11 +360,8 @@ class App extends React.Component {
     return ( 
       <div className="App">
          <header className="App-header">
-         
-
          <div id = "function">
            <text>Function Graphing</text>
-           <div id = "addFunction"></div>
            {
             that.state.functions.map((inputObject,index) => {
               return (
@@ -519,7 +525,6 @@ class App extends React.Component {
 
          <div id = "constants">
            <text>Constants</text>
-           <div id = "addConstants"></div>
            {
             that.state.constants.map((inputObject,index) => {
               return (
@@ -576,7 +581,46 @@ class App extends React.Component {
           }
            <button onClick = {function(){that.addConstant(that.state.constants.length+that.state.constoffset);}}>+</button>
         <br /> 
-        </div>         
+        </div> 
+        <div id = "calculations">
+           <text>Calculations</text>
+           {
+            that.state.calculations.map((inputObject,index) => {
+              return (
+                <div>
+                  <input id = {String(index)+"exp"} value={inputObject.expression} type="text" onChange = {function(){
+                      try { 
+                        console.log(inputObject.expression)
+                        inputObject.expression = document.getElementById(String(index)+"exp").value
+                        inputObject.value=math.compile(inputObject.expression).evaluate().toFixed(2)
+                        that.setState({calculations:that.state.calculations})
+                      } catch 
+                      {
+                       inputObject.expression = document.getElementById(String(index)+"exp").value
+                       inputObject.value=0
+                       that.setState({calculations:that.state.calculations})
+                      }
+                      //inputObject.value = math.compile(inputObject.expression).evaluate().toFixed(2)
+                     // that.setState({calculations:that.state.calculations})
+                  }}/>
+                  <output>= {inputObject.value}</output>
+                  <button onClick={
+                    function() {
+
+                      that.state.calculations.splice(index,1);
+                      that.state.calcoffset++;
+                      that.setState({calculations:that.state.calculations});
+                    }
+                  } >-</button>
+                  <br />
+                </div>
+              )
+           })
+          }
+           <button onClick = {function(){that.addCalculation();}}>+</button>
+        <br /> 
+        </div> 
+
          <div id = "graph"></div>
 
         </header>
