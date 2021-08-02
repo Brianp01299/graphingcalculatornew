@@ -10,13 +10,17 @@ math.import({
     return ((math.compile(fcn).evaluate({'x':tx+dx})-math.compile(fcn).evaluate({'x':tx-dx}))/(2*dx))
   },
 
-  int: function integrals(fcn,a,b) {
+  int: function integrals(a,b,fcn) {
     var dx = .005
     var dir = 1;
-    if (a>=b-dx) {
+    if(a>b) {
+      dir*=-1
+    }
+    if (a*dir>=(b-dx)*dir) {
       return 0
     }
-    return integrals(fcn,a+dx,b) + (math.compile(fcn).evaluate({'x':a})+math.compile(fcn).evaluate({'x':a+dx}))*dx/2
+
+    return integrals(a+dx*dir,b,fcn) + (math.compile(fcn).evaluate({'x':a})+math.compile(fcn).evaluate({'x':a+dx*dir}))*dx*dir/2
   } 
 })
 
@@ -41,8 +45,8 @@ class App extends React.Component {
     this.state = {
       "minX": 0, //minmaxXY for visualization
       "minY":0,
-      "maxX":10,
-      "maxY":10,
+      "maxX":0,
+      "maxY":0,
       "sfg":{"derivative":"", "sliders":[
         {"name":"dx = ", "value":1,"min":1,"max":2,"step":.1,"switch":0},
         {"name":"dy = ", "value":1,"min":1,"max":2,"step":.1,"switch":0},
@@ -200,7 +204,8 @@ class App extends React.Component {
       yaxis: {
         title: 'y',
         showline: false
-      }
+      },
+
     };  
     this.state.arr = []
     window.Plotly.newPlot("graph", this.make_trace({data:this.state.arr,set_type:"scatter", set_mode : "lines"}), layout);
@@ -212,23 +217,31 @@ class App extends React.Component {
     try {
       var graphDiv = document.getElementById('graph');
       var layout = {
+        dragmode: 'pan',
         xaxis: {
           title: 'x',
-          showgrid: false,
-          zeroline: false
+          zeroline: true,
+          tick0: 0,
+          tickcolor: '#000'
         },
         yaxis: {
-          title: 'y',
-          showline: false
+          tick0: 0,
+          tickcolor: '#000'
         }
       };  
       var sfg_plots = this.make_sfg_trace({data:this.state.arr,set_type:"scatter", set_mode : "lines"})
       var other_plot = this.make_trace({data:this.state.arr_2,set_type:"scatter", set_mode : "lines"})
       for (var i = 0;i<other_plot.length;i++) {
-        sfg_plots.push(other_plot[i])
+        sfg_plots.unshift(other_plot[i])
       }
       this.state.length=sfg_plots.length;
-      window.Plotly.newPlot(graphDiv, sfg_plots, layout);
+      window.Plotly.newPlot(graphDiv, sfg_plots, layout, {'displaylogo': false,scrollZoom: true,'modeBarButtonsToRemove': ['zoom', 'pan',  'select', 'zoomIn', 'zoomOut', 'autoScale', 'resetScale']}).then(plot => {
+    //console.log(plot.layout);
+    this.setState({'minX':0})
+    this.setState({'maxX':10})
+    this.setState({'minY':0})
+    this.setState({'maxY':10})
+});
     } catch(e) {
       alert(e);
      // console.log(e)
@@ -264,22 +277,10 @@ class App extends React.Component {
         this.state.arr_2.push(this.state.eulers[i].name)
       }
 
-
-      var layout = {
-        xaxis: {
-          title: 'x',
-          showgrid: false,
-          zeroline: false
-        },
-        yaxis: {
-          title: 'y',
-          showline: false
-        }
-      };  
       var sfg_plots = this.make_sfg_trace({data:this.state.arr,set_type:"scatter", set_mode : "lines"})
       var other_plot = this.make_trace({data:this.state.arr_2,set_type:"scatter", set_mode : "lines"})
       for (var i = 0;i<other_plot.length;i++) {
-        sfg_plots.push(other_plot[i])
+        sfg_plots.unshift(other_plot[i])
       }
       var remove = []
       for (var i =0;i<this.state.length;i++) {
@@ -287,11 +288,15 @@ class App extends React.Component {
 
       }
       window.Plotly.deleteTraces(graphDiv,remove);
-      window.Plotly.addTraces(graphDiv,sfg_plots)
+      window.Plotly.addTraces(graphDiv,sfg_plots).then(plot => {
+    this.setState({'minX':plot.layout.xaxis.range[0]+.5})   
+    this.setState({'maxX':plot.layout.xaxis.range[1]})
+    this.setState({'minY':plot.layout.yaxis.range[0]+.5})
+    this.setState({'maxY':plot.layout.yaxis.range[1]})
+});
       this.state.length=sfg_plots.length;
     } catch(e) {
       alert(e);
-      //console.log(e)
     }
 
   }
@@ -301,6 +306,14 @@ class App extends React.Component {
     
     this.interval = setInterval(function(){
       //every second if the + button is pressed uses the timer to run through eaach slider.
+        let scope = {};
+                        //create the scope by evaluating the constants.
+        //console.log(that.state.minX,that.state.maxX,that.state.minY,that.state.maxY)              
+        for (var i = 0;i<that.state.functions.length;i++) {
+            scope[that.state.functions[i].name]= that.state.functions[i].value;                      
+        }
+                        
+                        
         for (var i=0;i<that.state.sfg.sliders.length;i++) {
           var value = parseFloat(that.state.sfg.sliders.[i].value);
           var max = parseFloat(that.state.sfg.sliders.[i].max);
@@ -308,10 +321,10 @@ class App extends React.Component {
           var step = parseFloat(that.state.sfg.sliders.[i].step);
           if(that.state.sfg.sliders.[i].switch===1) {
             if(value>max-step) {
-              that.state.sfg.sliders.[i].value=(min-step).toFixed(2);
+              that.state.sfg.sliders.[i].value=(min-step).toFixed(4);
               value=min-step
             }
-            that.state.sfg.sliders.[i].value=(value+step).toFixed(2);
+            that.state.sfg.sliders.[i].value=(value+step).toFixed(4);
             that.setState({sliders:that.state.sliders})
           }
            }
@@ -322,30 +335,39 @@ class App extends React.Component {
           var step = parseFloat(that.state.eulers[i].step);
           if(that.state.eulers[i].switch===1) {
             if(dx>max-step) {
-              that.state.eulers[i].dx=(min-step).toFixed(2);
+              that.state.eulers[i].dx=(min-step).toFixed(4);
               dx=min-step
             }
-            that.state.eulers[i].dx=(dx+step).toFixed(2);
+            that.state.eulers[i].dx=(dx+step).toFixed(4);
             that.setState({eulers:that.state.eulers})
           }
            }
-        for (var i=0;i<that.state.calculations.length;i++) {
-          
-        }
         for (var i=0;i<that.state.constants.length;i++) {
+          scope[that.state.constants[i].name] = math.compile(that.state.constants[i].value).evaluate(scope);
           var value = parseFloat(that.state.constants[i].value); 
           var max = parseFloat(that.state.constants[i].max);
           var min = parseFloat(that.state.constants[i].min);
           var step = parseFloat(that.state.constants[i].step);
           if(that.state.constants[i].switch===1) {
             if(value>max-step) {
-              that.state.constants[i].value=(min-step).toFixed(2);
+              that.state.constants[i].value=(min-step).toFixed(4);
               value=min-step
             }
-            that.state.constants[i].value=(value+step).toFixed(2);
+            that.state.constants[i].value=(value+step).toFixed(4);
             that.setState({constants:that.state.constants})
           }
-           }
+           } 
+        for (var i=0;i<that.state.calculations.length;i++) {
+          try {
+            that.state.calculations[i].value=math.compile(that.state.calculations[i].expression).evaluate(scope).toFixed(4)
+            that.setState({calculations:that.state.calculations})                        
+          } catch(e){
+            //console.log(e)
+            that.state.calculations.value='err'
+            that.setState({calculations:that.state.calculations})
+          }
+        }
+        
           that.update()
       }, 1000);
     }
@@ -589,33 +611,10 @@ class App extends React.Component {
               return (
                 <div>
                   <input id = {String(index)+"exp"} value={inputObject.expression} type="text" onChange = {function(){
-                      try { 
-                        
                         inputObject.expression = document.getElementById(String(index)+"exp").value
-                        let scope = {};
-                        //create the scope by evaluating the constants.
-                        for (var i = 0;i<that.state.constants.length;i++) {
-                          scope[that.state.constants[i].name] = math.compile(that.state.constants[i].value).evaluate(scope);
-                         // console.log(1)
-                        }
-                        for (var i = 0;i<that.state.functions.length;i++) {
-                          scope[that.state.functions[i].name]= that.state.functions[i].value;
-                          
-                        }
-                        console.log(scope)
-                        inputObject.value=math.compile(inputObject.expression).evaluate(scope).toFixed(2)
-                        console.log(scope)
                         that.setState({calculations:that.state.calculations})
-                        
-                      } catch 
-                      {
-                       inputObject.expression = document.getElementById(String(index)+"exp").value
-                       inputObject.value=0
-                       that.setState({calculations:that.state.calculations})
-                      }
-                      //inputObject.value = math.compile(inputObject.expression).evaluate().toFixed(2)
-                     // that.setState({calculations:that.state.calculations})
-                  }}/>
+                        } }
+                   />
                   <output>= {inputObject.value}</output>
                   <button onClick={
                     function() {
@@ -634,7 +633,7 @@ class App extends React.Component {
         <br /> 
         </div> 
 
-         <div id = "graph"></div>
+         <div id = "graph" ></div>
 
         </header>
       </div>
