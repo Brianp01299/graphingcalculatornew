@@ -26,15 +26,12 @@ math.import({
 
 //to do 
 //add limits to dx/dy
-//add textboxes (+hopefully scroll wheel) for boundaries of graph
 //long term/less important: 
 //vertical lines (maybe check functinosn if name==='x' change the visualiztion to rely on y rather than x)
 //produce csv of data point
 //int(fcn,0,x)dt
-//add calculation sections
 //CSS for better UI
-//better error handlging
-
+//better error handling
 //next week create video for CHu
 
 class App extends React.Component {
@@ -56,8 +53,8 @@ class App extends React.Component {
       "dataY":[],
       "arr":[],      
       "arr_2":[],
-      "functions":[{"value":"x","name":"y"}],//array of functions
-      "eulers":[{"min":0,"max":1,"value":"2*x","step":.1,"name":'dy/dx','num':10,"switch":0,"dx":.1, "x0":0,"y0":0,"time":0}],
+      "functions":[{"value":"","name":""}],//array of functions
+      "eulers":[{"min":0,"max":1,"value":"","step":.1,"name":'dy/dx','num':10,"switch":0,"dx":.1, "x0":0,"y0":0,"time":0}],
       "constants":[{"min":0,"max":1,"value":.5,"step":.1,"name":'a',"switch":0}],//array of constants starts with 1 constant 'a'
       "calculations":[{"expression":"","value":0}],
       "switch":[9654 , 10074,"",10074],//used for the switch for paus/play button
@@ -109,12 +106,29 @@ class App extends React.Component {
     var dx=parseFloat(that.state.sfg.sliders[0].value);
     var dy=parseFloat(that.state.sfg.sliders[1].value);
     var len=parseFloat(that.state.sfg.sliders[2].value);
+
     var minX=parseFloat(that.state.minX);
     var maxX=parseFloat(that.state.maxX);
     var minY=parseFloat(that.state.minY);
     var maxY=parseFloat(that.state.maxY);
-    for (var i =  minX;i<maxX;i+=dx) {
-      for (var j = minY;j<maxY;j+=dy) {
+    if(len>(maxX-minX)/2) {
+      len = (maxX-minX)/4
+    }
+    if ((maxX-minX)/dx >15) {
+      dx = (maxX-minX)/15
+    }
+    if((maxX-minX)/dx <1) {
+      dx =1
+    }
+    if((maxY-minY)/dy <1) {
+      dy =1
+    }
+    if ((maxY-minY)/dy >15) {
+      dy = (maxY-minY)/15
+    }
+    //console.log(minX,maxX)
+    for (var i =  minX+len;i<=maxX-len;i+=dx) {
+      for (var j = minY+len;j<=maxY-len;j+=dy) {
         var evaled = that.evaluateExpression(i,j,derivative,scope);
         that.state.arr.push([i-len/2,i+len/2]);
         that.state.arr.push([j-evaled*len/2,j+evaled*len/2]);
@@ -235,13 +249,7 @@ class App extends React.Component {
         sfg_plots.unshift(other_plot[i])
       }
       this.state.length=sfg_plots.length;
-      window.Plotly.newPlot(graphDiv, sfg_plots, layout, {'displaylogo': false,scrollZoom: true,'modeBarButtonsToRemove': ['zoom', 'pan',  'select', 'zoomIn', 'zoomOut', 'autoScale', 'resetScale']}).then(plot => {
-    //console.log(plot.layout);
-    this.setState({'minX':0})
-    this.setState({'maxX':10})
-    this.setState({'minY':0})
-    this.setState({'maxY':10})
-});
+      window.Plotly.newPlot(graphDiv, sfg_plots, layout, {'displaylogo': false,scrollZoom: true,'modeBarButtonsToRemove': ['zoom', 'pan',  'select', 'zoomIn', 'zoomOut', 'autoScale', 'resetScale']})
     } catch(e) {
       alert(e);
      // console.log(e)
@@ -285,13 +293,14 @@ class App extends React.Component {
       var remove = []
       for (var i =0;i<this.state.length;i++) {
         remove.push(i)
+        //console.log(remove.length)
 
       }
       window.Plotly.deleteTraces(graphDiv,remove);
       window.Plotly.addTraces(graphDiv,sfg_plots).then(plot => {
-    this.setState({'minX':plot.layout.xaxis.range[0]+.5})   
+    this.setState({'minX':plot.layout.xaxis.range[0]})   
     this.setState({'maxX':plot.layout.xaxis.range[1]})
-    this.setState({'minY':plot.layout.yaxis.range[0]+.5})
+    this.setState({'minY':plot.layout.yaxis.range[0]})
     this.setState({'maxY':plot.layout.yaxis.range[1]})
 });
       this.state.length=sfg_plots.length;
