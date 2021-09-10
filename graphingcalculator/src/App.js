@@ -3,6 +3,7 @@ import React, {useEffect} from "react";
 import Component from "react";
 import { create, all } from 'mathjs';
 const math = create(all); 
+const port = process.env.PORT || 3000;
 
 math.import({
   ddx: function (fcn,tx) {
